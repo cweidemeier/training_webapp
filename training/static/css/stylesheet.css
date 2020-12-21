@@ -1,0 +1,65 @@
+body {
+    background-color: lightblue;
+}
+
+
+/*Align the title to the center of the page*/
+.title{
+    text-align: center;
+   }
+
+
+/*Color, align and shadow the table*/
+table{
+    width: 100%;
+      margin: auto;
+    text-align: center;
+   box-shadow: 12px 12px 30px 6px #2e6da4;
+   font-size: 15px;
+  }
+  
+  /*Make alternating colors for the table rows*/
+  table tr:nth-child(odd){
+    background: rgb(219, 224, 226)
+  }
+   
+  table tr:nth-child(even){
+   background: rgb(5, 75, 75)
+  }
+
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 12px 15px;
+}
+
+.styled-table tbody tr {
+  border-bottom: 0px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type {
+  border-bottom: 0px solid #009879;
+}
+
+.styled-table tbody tr.active-row {
+  font-weight: bold;
+  color: #050505;
+}

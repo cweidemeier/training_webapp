@@ -1,0 +1,15 @@
+from django.contrib import admin
+from django.urls import  path
+from . import views
+
+
+
+urlpatterns = [
+    path('', views.home, name = 'home'),
+    path('add_training', views.add_training, name = 'add_training'),
+    path('add_exercise', views.add_exercise, name = 'add_exercise'),
+    path('training_list', views.training_list, name = 'list'),
+    path('dashboard', views.dashboard, name = 'dashboard'),
+    path('training_list/<int:id>', views.training_list_redirect, name = 'ex'),
+
+]
