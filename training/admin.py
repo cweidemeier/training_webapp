@@ -9,14 +9,13 @@ class TrainingAdmin(admin.ModelAdmin):
     list_display = ['training_type', 'location', 'training_date']
     form = TrainingForm
     list_filter = ['training_type', 'location']
-    #search_fields = ['training_type', 'location', 'training_date']
 
 
 class ExerciseAdmin(admin.ModelAdmin):
     list_display = ['training_ID', 'exercise', 'reps']
     form = ExerciseForm
     list_filter = ['training_ID', 'exercise']
-    search_fields = ['training_ID']
+
 
 
 admin.site.register(Training, TrainingAdmin)

@@ -55,11 +55,14 @@
 <main role="main" class="container">
   <div class="jumbotron">
     <h1 class='title'>{{title}}</h1>
-    <form method='post' action=''>
+    <div style = 'width: 35%'>
+      <form method='post' action=''>
       {% csrf_token %}
-      {{form|crispy}}
-    </form>
-
+        {{form|crispy}}
+        <input class='btn btn-secondary' type='submit' value = 'Filter' /> 
+        <a class='btn btn-secondary' href="training_list" role="button">Refresh</a>
+      </form>
+    </div>
     <table class ='styled-table'>
         <tr>
             <th>#</th>

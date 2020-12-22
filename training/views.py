@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import TrainingForm, ExerciseForm, Training_list_searchForm
-from .models import Training, Exercise
+from .models import Exercise_name, Training, Exercise
 # Create your views here.
 
 
@@ -8,8 +8,8 @@ from .models import Training, Exercise
 from io import StringIO
 import pandas as pd
 import calmap
-
-
+from django.db.models import Sum
+import pandas as pd
 
 #####################################
 ## avticity plot 
@@ -34,11 +34,36 @@ def plot_acticityplot():
     # plot and safe image
     imgdata = StringIO()
     fig = calmap.yearplot(events, dayticks=[0, 2, 4, 6])
-    fig.figure.savefig('./training/static/img/test.svg', transparent=True, bbox_inches='tight')
+    fig.figure.savefig('./training/static/img/activity_plot.svg', transparent=True, bbox_inches='tight')
 
-    # imgdata.seek(0)
-    # data = imgdata.getvalue()
-    # return data 
+
+
+def plot_histograms():
+    exercise = []
+    reps_sum = []
+
+    # # histogram for total of reps per exercise 
+    # for e in range(len(Exercise_name.objects.all())):
+    #     exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+    #     rep = Exercise.objects.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
+    #     reps_sum.append(0 if rep is None else rep)
+
+    # histogram for total of exercises done - vllt. noch ein fehler ? 
+    for e in range(len(Exercise_name.objects.all())):
+        exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+        rep = Exercise.objects.filter(exercise_id = e+1).count()
+        reps_sum.append(0 if rep is None else rep)
+
+    # convert to df 
+    df = pd.DataFrame({'exercise name': exercise,'reps': reps_sum})
+    df.set_index('exercise name', inplace=True)
+    df.sort_values('reps', inplace=True, ascending = False)
+    
+    #plot and safe 
+    imgdata = StringIO()
+    fig = df.plot(y='reps', kind='bar', legend=False)
+    fig.figure.savefig('./training/static/img/exercise_histo.svg', transparent=True, bbox_inches='tight')
+
 
 
 
@@ -73,7 +98,7 @@ def add_exercise(request):
     if form.is_valid():
         form.save()
         return redirect('/add_exercise')
-        # add button: redirect to training_list. muss man in html machen. 
+       
 
     context = { 'title': title , 'form': form}
     return render(request, 'exercise_entry.html', context) 
@@ -84,11 +109,11 @@ def training_list(request):
     title = 'List of all trainings'
     queryset = Training.objects.all()
     form = Training_list_searchForm(request.POST or None)
-    context = { 'title': title, 'form':form,  'queryset': queryset}
-    
+
     if request.method == 'POST':
-        queryset = Training.objects.all().order_by('-training_day').filter(training_type__icontains=form['training_type'].value())
-        context = {'title': title, 'queryset':queryset, 'form':form}
+        queryset =  Training.objects.all().filter(training_type = form['training_type'].value())
+
+    context = { 'title': title, 'form':form,  'queryset': queryset}
     return render(request, 'training_list.html', context)
 
 
@@ -103,7 +128,7 @@ def training_list_redirect(request, id=None):
 
 
 def dashboard(request):
-    
-    title = 'There will be a dashboard soon'
+    title = 'Interactive Dashboard - soon'
+    plot_histograms()
     context = { 'title': title }
     return render(request, 'dashboard.html', context)

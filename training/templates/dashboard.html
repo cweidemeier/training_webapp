@@ -51,13 +51,17 @@
 
 {% include 'navbar.html' %}
 
-<main role="main" class="container">
+<main role="main" class="container" >
   <div class="jumbotron">
     <h1 class='title'>{{title}}</h1>
+    <img src="{% static 'img/exercise_histo.svg' %}" class="container" style="width: 75%; height: 75%; align-items: center">
+    
+    
     <p>
         <ul>
-            <li> histogram with max trained exercises  </li>
+            <li> histogram with max trained exercises /reps </li>
             <li> heatmap with day frequency  </li>
+            <li> activity plot - location  </li>
 
         </ul>
     </p>
@@ -74,7 +78,8 @@
             <li> test.svg cashed - force load images on page ?  </li>
             <li> "PLUUUUUUS ULTRA"  </li>
             <li> ITS BEEN x days - und dann verschiedene Nachrichten ?   </li>
-           
+            <li> ManyToMany - filter_horizontal   </li>
+            <li> User interface + show only their trainings </li>
         </ul>
     </p>
     <p style="text-align:center">
