@@ -20,10 +20,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('training.urls')),
-    path('add_training', include('training.urls')),
-    path('add_exercise', include('training.urls')),
-    path('training_list', include('training.urls')),
-    path('dashboard', include('training.urls')),
-    path('training_list/<int:id>', include('training.urls')),
+    path('django_plotly_dash/', include('django_plotly_dash.urls'))
+
 
 ]

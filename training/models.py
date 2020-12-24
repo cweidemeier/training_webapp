@@ -4,6 +4,9 @@ from django.db.models.deletion import CASCADE
 
 
 
+
+
+
 class Training_type(models.Model):
     training_type = models.CharField(max_length=30, blank=True)
 
@@ -43,7 +46,10 @@ class Exercise(models.Model):
     exercise = models.ForeignKey(Exercise_name, on_delete=CASCADE, null=True)
     reps = models.IntegerField(choices=list(zip(range(1, 21), range(1, 21))), unique=False)
 
-
     def __str__(self):
         return str(self.exercise)
+
+
+
+
 

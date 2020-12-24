@@ -59,11 +59,13 @@
         <tr>
             <th>Exercise</th>
             <th>Reps</th>
+            
         </tr>
         {% for instance in queryset %}
         <tr>
             <td>{{instance.exercise}}</td>
             <td>{{instance.reps}}</td>
+            
         </tr>
     {% endfor %}
     </table>

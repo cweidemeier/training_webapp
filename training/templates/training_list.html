@@ -69,6 +69,7 @@
             <th>Training</th>
             <th>Location</th>
             <th>Date</th>
+            
         </tr>
         {% for instance in queryset %}
         <tr>
@@ -76,6 +77,7 @@
             <td> <b> <a href="/training_list/{{instance.training_ID}}" style='color: black'> {{instance.training_type}} </a> </b></td>
             <td>{{instance.location}}</td>
             <td>{{instance.training_date}}</td>
+            
         </tr>
         {% endfor %}
     </table>
