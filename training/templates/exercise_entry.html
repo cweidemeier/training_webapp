@@ -57,8 +57,8 @@
     <form method='post' action=''>
         {% csrf_token %}
         {{form|crispy}}
-        <input class='btn btn-secondary' type='submit' value = 'save' />
-        <a class='btn btn-secondary' href="/" role="button">Finish Training</a>
+        <input class='btn btn-secondary' name = 'save' type='submit' value = 'save' />
+        <input class='btn btn-secondary' name = 'finish' type='submit' value = 'finish training' />
     </form>
   </div>
 </main>
