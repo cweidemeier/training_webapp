@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import permission_required
 def home(request):
     subtitle = 'Activity plot'
     title = 'Welcome to TRAIN WITH CAN'
-    context = { 'title': title,  'subtitle':subtitle }
+    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]) }
     return render(request, 'home.html', context)
 
 
