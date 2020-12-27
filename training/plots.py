@@ -19,9 +19,6 @@ import plotly.graph_objs as go
 import datetime
 from datetime import timedelta, date
 import numpy as np
-import dash_core_components as dcc
-import dash_html_components as html
-import dash
 from plotly.subplots import make_subplots
 
 
@@ -80,7 +77,8 @@ def plot_histograms_exercise():
     #fig = go.Figure(data = my_data, layout = my_layout)
 
     #py.iplot(fig)
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', config = config )
     return plot_div
 
 
@@ -105,7 +103,8 @@ def plot_histograms_reps():
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         
         })
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
 
@@ -135,7 +134,8 @@ def plot_histograms_reppset():
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         
         })
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
 
@@ -159,9 +159,9 @@ def plot_histograms_days():
     fig.update_layout({
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-        
         })
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
     return plot_div
 
 
@@ -175,7 +175,7 @@ def plot_histograms_types():
         training.append(Training_type.objects.values('training_type')[e]['training_type'])
         temp = Training.objects.filter(training_type = e+1).count()
         sum_.append(0 if temp is None else temp)
-
+    print(training)
     # convert to df 
     df = pd.DataFrame({'training_type': training,'frequency': sum_})
     df.sort_values('frequency', inplace=True, ascending = False)
@@ -187,8 +187,8 @@ def plot_histograms_types():
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        
        })
-
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
 
@@ -232,15 +232,22 @@ def display_year(z,
     weeknumber_of_dates = [int(i.strftime("%V")) if not (int(i.strftime("%V")) == 1 and i.month == 12) else 53
                            for i in dates_in_year] #gives [1,1,1,1,1,1,1,2,2,2,2,2,2,2,…] name is self-explanatory
 
-    # types = []
-    # dates = []
-    # for i in range(len(Training.objects.values('training_date', 'training_type'))):
-    #     types.append(Training.objects.values('training_type')[i]['training_type'])
-    #     dates.append(Training.objects.values('training_date')[i]['training_date'])
+    types = []
+    dates = []
+    for i in range(len(Training.objects.values('training_date', 'training_type'))):
+        types.append(Training.objects.values('training_type')[i]['training_type'])
+        dates.append(Training.objects.values('training_date')[i]['training_date'])
+    text = ['' for i in dates_in_year] #gives something like list of strings like ‘2018-01-25’ for each date..
+ 
+    for i in range(len(dates)): 
+        if dates[i] in dates_in_year: 
+            x = types[i] - 1
+            # print(Training_type.objects.values('training_type')[x]['training_type'])
+            
+            text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + str(dates_in_year[dates_in_year.index(dates[i])])
 
 
-    text = [str(i) for i in dates_in_year] #gives something like list of strings like ‘2018-01-25’ for each date..
-    
+
 
     #4cc417 green #347c17 dark green
     colorscale=[[False, 'lightgrey'], [True, '#347c17']]
@@ -304,8 +311,8 @@ def display_year(z,
         yaxis=dict(
             showline=False, showgrid=False, zeroline=False,
             tickmode='array',
-            ticktext=['Mon ', 'Tue ', 'Wed ', 'Thu ', 'Fri ', 'Sat ', 'Sun '],
-            tickvals=[0, 1, 2, 3, 4, 5, 6],
+            ticktext=['Mon ',  'Wed ',  'Fri ',  'Sun '],
+            tickvals=[0,  2,  4,  6],
             autorange="reversed"
         ),
         xaxis=dict(
@@ -319,7 +326,7 @@ def display_year(z,
         margin = dict(t=40),
         showlegend=False
     )
-
+    
     if fig is None:
         fig = go.Figure(data=data, layout=layout)
     else:
@@ -328,7 +335,8 @@ def display_year(z,
         fig.update_xaxes(layout['xaxis'])
         fig.update_yaxes(layout['yaxis'])
 
-    
+    fig['layout']['yaxis']['scaleanchor']='x'
+
     return fig
 
 
@@ -337,13 +345,19 @@ def display_years(z, years):
     for i, year in enumerate(years):
         data = z[i*365 : (i+1)*365]
         display_year(data, year=year, fig=fig, row=i)
-        fig.update_layout(height=250*len(years))
+    
+    
+    
+    config = {'displayModeBar': False}
+
+
+
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-       
        })
-    plot_div = plot(fig, output_type='div')
+    
+    plot_div = plot(fig, output_type='div', config=config)
     return plot_div
 
 
@@ -370,8 +384,5 @@ def get_training_days():
             this_year[i] = 1 
         else: 
             this_year[i] = 0 
-
-
-   
 
     return this_year

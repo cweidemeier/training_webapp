@@ -5,6 +5,8 @@ from .models import Exercise_name, Training, Exercise
 
 # import plot functions from plots.py 
 from .plots import * 
+from datetime import date
+
 
 
 from django.contrib.auth.decorators import permission_required
@@ -13,8 +15,12 @@ from django.contrib.auth.decorators import permission_required
 
 def home(request):
     subtitle = 'Activity plot'
-    title = 'Welcome to TRAIN WITH CAN'
-    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]) }
+    title = 'Welcome to TRAIN WITH CanDyman'
+    today = date.today()
+    last_training = Training.objects.values().order_by('-training_date').first()['training_date']
+    delta = today - last_training
+    subsubtitle = f"It's been {delta.days} days since your last training!"
+    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]), 'subsubtitle': subsubtitle }
     return render(request, 'home.html', context)
 
 
