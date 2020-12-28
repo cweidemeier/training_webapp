@@ -19,7 +19,10 @@ def home(request):
     today = date.today()
     last_training = Training.objects.values().order_by('-training_date').first()['training_date']
     delta = today - last_training
-    subsubtitle = f"It's been {delta.days} days since your last training!"
+    if delta.days == 1: 
+        subsubtitle = f"It's been {delta.days} day since your last training!"
+    else: 
+        subsubtitle = f"It's been {delta.days} days since your last training!"
     context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]), 'subsubtitle': subsubtitle }
     return render(request, 'home.html', context)
 
@@ -30,8 +33,7 @@ def add_training(request):
         form = TrainingForm(request.POST or None)
         if form.is_valid():
             form.save()
-            # render activity_plot and save 
-            plot_acticityplot()
+
             return redirect('/add_exercise')
     else: 
         form = TrainingForm(request.POST or None)
@@ -96,9 +98,11 @@ def todo(request):
 
 
 def dashboard(request):
+    title = 'Some stats'
     context = {'plot1': plot_histograms_exercise(), 
                'plot2': plot_histograms_reps(), 
                'plot3': plot_histograms_reppset(), 
                'plot4': plot_histograms_days(),
-               'plot5': plot_histograms_types()}
+               'plot5': plot_histograms_types(),
+               'title':title}
     return render(request, 'dashboard.html', context)

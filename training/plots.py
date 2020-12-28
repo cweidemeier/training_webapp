@@ -3,7 +3,7 @@ from .models import Exercise_name, Training, Exercise, Training_type
 
 # graph test 
 import pandas as pd
-import calmap
+
 from django.db.models import Sum
 
 
@@ -23,25 +23,6 @@ from plotly.subplots import make_subplots
 
 
 
-
-def plot_acticityplot():
-    # create pandas series with all training dates from database / query 
-    dates = []
-    for i in range(len(Training.objects.values('training_date'))):
-        dates.append(Training.objects.values('training_date')[i]['training_date'])
-    events = pd.Series(dates)
-
-    # reindex series, such that the index is a DatetimeIndex - necessary for calmap
-    temp_series = pd.DatetimeIndex(events.values)
-    events = events.reindex(temp_series)
-
-    # reference the type of training for each date
-    for i in range(len(dates)): 
-         events.loc[dates[i]] = Training.objects.values('training_type')[i]['training_type']
-    
-    # plot and safe image
-    fig = calmap.yearplot(events, dayticks=[0, 2, 4, 6])
-    fig.figure.savefig('./training/static/img/activity_plot.svg', transparent=True, bbox_inches='tight')
 
 
 
@@ -67,16 +48,7 @@ def plot_histograms_exercise():
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        
        })
-    # second attempt with plotly go. 
-    # my_data = [go.Bar( x = df['exercise name'], y = df.reps)]
-    # my_layout = go.Layout({"title": "Views by publisher",
-    #                        "yaxis": {"title":"Views"},
-    #                        "xaxis": {"title":"Publisher"},
-    #                        "showlegend": False})
-
-    #fig = go.Figure(data = my_data, layout = my_layout)
-
-    #py.iplot(fig)
+    fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config )
     return plot_div
@@ -103,6 +75,7 @@ def plot_histograms_reps():
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         
         })
+    fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -134,6 +107,7 @@ def plot_histograms_reppset():
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         
         })
+    fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -151,8 +125,6 @@ def plot_histograms_days():
     df = pd.DataFrame()
     df['weekdays']  = dic.keys()
     df['frequency'] = dic.values()
-    #print(df)
-    # df.sort_values( inplace=True, ascending = False)
 
     #plot and save 
     fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
@@ -160,6 +132,7 @@ def plot_histograms_days():
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         })
+    fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
     return plot_div
@@ -175,7 +148,7 @@ def plot_histograms_types():
         training.append(Training_type.objects.values('training_type')[e]['training_type'])
         temp = Training.objects.filter(training_type = e+1).count()
         sum_.append(0 if temp is None else temp)
-    print(training)
+
     # convert to df 
     df = pd.DataFrame({'training_type': training,'frequency': sum_})
     df.sort_values('frequency', inplace=True, ascending = False)
@@ -187,6 +160,7 @@ def plot_histograms_types():
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        
        })
+    fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -308,6 +282,7 @@ def display_year(z,
                     
     layout = go.Layout(
         height=250,
+        
         yaxis=dict(
             showline=False, showgrid=False, zeroline=False,
             tickmode='array',
@@ -334,9 +309,9 @@ def display_year(z,
         fig.update_layout(layout)
         fig.update_xaxes(layout['xaxis'])
         fig.update_yaxes(layout['yaxis'])
-
+    fig.update_layout(margin=dict(l=0, r=0))
     fig['layout']['yaxis']['scaleanchor']='x'
-
+     
     return fig
 
 
@@ -346,11 +321,7 @@ def display_years(z, years):
         data = z[i*365 : (i+1)*365]
         display_year(data, year=year, fig=fig, row=i)
     
-    
-    
     config = {'displayModeBar': False}
-
-
 
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',

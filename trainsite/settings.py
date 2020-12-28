@@ -25,8 +25,8 @@ SECRET_KEY = 'v=^%)*2%trg0jt00p#6fgc!)4-xyrlk0vv@35zca5-@&1hha(y'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['trainwithcan.pythonanywhere.com']
+ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['trainwithcan.pythonanywhere.com']
 
 
 # Application definition
@@ -129,8 +129,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 VENV_PATH = os.path.dirname(BASE_DIR)
 
 # when pushing to git for pythonanywhere  - vllt. check nochmal. 
-STATIC_ROOT = '/home/trainwithcan/training_webapp/training/static'
-# STATIC_ROOT = os.path.join(VENV_PATH, 'static_root')
+#STATIC_ROOT = '/home/trainwithcan/training_webapp/training/static'
+STATIC_ROOT = os.path.join(VENV_PATH, 'static_root')
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

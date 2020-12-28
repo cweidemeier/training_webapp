@@ -47,25 +47,63 @@
     <!-- Custom styles for this template -->
     <link href="{% static 'css/stylesheet.css' %}" rel="stylesheet">
     <link href="{% static 'css/navbar-top-fixed.css' %}" rel="stylesheet">
+
+
+    <script src= 
+    "https://code.jquery.com/jquery-1.12.4.min.js"></script> 
+        <style type="text/css"> 
+            label { 
+                margin-right: 20px; 
+            } 
+        </style> 
   </head>
   <body>
 
 {% include 'navbar.html' %}
 
 <main role="main" class="container" >
+
   <div class="jumbotron">
     <h1 class='title'>{{title}}</h1>
 
-    {{ plot1 | safe}}
+    <div style="text-align:center"> 
+        <label> 
+            <input type="checkbox" name="colorCheckbox" 
+                   value="sets" checked> #sets </label> 
+        <label> 
+            <input type="checkbox" name="colorCheckbox" 
+                   value="reps" checked> #reps</label> 
+        <label> 
+            <input type="checkbox" name="colorCheckbox" 
+                   value="Areps" checked> 	&Oslash; reps</label> 
+        <label> 
+            <input type="checkbox" name="colorCheckbox" 
+                   value="trainingtype" checked> training type</label> 
+        <label> 
+            <input type="checkbox" name="colorCheckbox" 
+                   value="weekday" checked> weekdays</label>                                    
+    </div> 
 
-    {{ plot2 | safe}}
+    <div class="sets selectt"> 
+      {{ plot1 | safe}} </div> 
+    <div class="reps selectt"> 
+      {{ plot2 | safe}}</div> 
+    <div class="Areps selectt"> 
+      {{ plot3 | safe}}</div> 
+    <div class="trainingtype selectt"> 
+      {{ plot5 | safe}}</div> 
+    <div class="weekday selectt"> 
+      {{ plot4 | safe}}</div> 
+    <script type="text/javascript"> 
+        $(document).ready(function() { 
+            $('input[type="checkbox"]').change(function() { 
+                var inputValue = $(this).attr("value"); 
+                $("." + inputValue).toggle(); 
+            }); 
+        }); 
+    </script> 
 
-    {{ plot3 | safe}}
 
-    {{ plot5 | safe}}
-
-    {{ plot4 | safe}}
-  </div>
 </main>
 <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
       <script>window.jQuery || document.write('<script src="/js/jquery.slim.min.js"><\/script>')</script><script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script></body>
