@@ -14,7 +14,6 @@ from django.contrib.auth.decorators import permission_required
 
 
 def home(request):
-
     title = 'Welcome to TRAIN WITH CanDyman'
     today = date.today()
     last_training = Training.objects.values().order_by('-training_date').first()['training_date']
@@ -24,7 +23,9 @@ def home(request):
     else: 
         subtitle = f"It's been {delta.days} days since your last training!"
     context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]) }
-    return render(request, 'home.html', context)
+    return render(request, 'base.html', context)
+
+
 
 
 def add_training(request):
@@ -32,7 +33,10 @@ def add_training(request):
     if request.user.is_authenticated:
         form = TrainingForm(request.POST or None)
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            obj.user_name = request.user
+            obj.save()
+            
             return redirect('/add_exercise')
     else: 
         form = TrainingForm(request.POST or None)
@@ -49,11 +53,15 @@ def add_exercise(request):
         form = ExerciseForm(request.POST or None, initial=Training.objects.values().first())
         if  request.method == 'POST' and 'save' in request.POST:
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False)
+                obj.user_name = request.user
+                obj.save()
                 return redirect('/add_exercise')
         if  request.method == 'POST' and 'finish' in request.POST:
             if form.is_valid():
-                form.save()
+                obj = form.save(commit=False)
+                obj.user_name = request.user
+                obj.save()
                 return redirect('/')
     else:
         form = ExerciseForm(request.POST or None, initial=Training.objects.values().first())

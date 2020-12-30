@@ -6,7 +6,7 @@ from django.forms import ModelForm
 class TrainingForm(ModelForm):
     class Meta:
         model = Training
-        fields = [ 'training_type', 'location', 'training_date' ]
+        fields = [ 'training_type', 'location', 'training_date']
     
 
 class ExerciseForm(ModelForm):

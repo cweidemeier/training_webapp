@@ -1,4 +1,7 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+{% load static %}
+
+
+<nav class="navbar navbar-expand-md navbar-dark mb-4 bg-dark">
     <a class="navbar-brand" href="/">Home</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -20,6 +23,20 @@
         <li class="nav-item">
           <a class="nav-link" href="/todo">ToDo</a>
         </li>
+      </ul>
+        <ul class="navbar-nav ml-auto">
+        {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="/accounts/logout">Logout</a>
+        </li>
+        {% else %}
+        <li class="nav-item" style='text-align: right;'>
+          <a class="nav-link" href="/accounts/login">Login</a>
+        </li>
+        <li class="nav-item" style='text-align: right;'>
+          <a class="nav-link" href="/accounts/register">Register</a>
+        </li>
+        {% endif %}
       </ul>
   
     </div>

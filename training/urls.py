@@ -11,6 +11,5 @@ urlpatterns = [
     path('todo', views.todo, name = 'todo'),
     path('training_list/<int:id>', views.training_list_redirect, name = 'ex'),
     path('dashboard', views.dashboard, name = 'dash'),
-    
 
 ]

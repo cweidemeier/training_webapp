@@ -22,5 +22,8 @@ urlpatterns = [
     path('', include('training.urls')),
 
 
+    path('accounts/', include('registration.backends.default.urls')),
+
+
 
 ]
