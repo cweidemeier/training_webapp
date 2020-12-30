@@ -14,16 +14,16 @@ from django.contrib.auth.decorators import permission_required
 
 
 def home(request):
-    subtitle = 'Activity plot'
+
     title = 'Welcome to TRAIN WITH CanDyman'
     today = date.today()
     last_training = Training.objects.values().order_by('-training_date').first()['training_date']
     delta = today - last_training
     if delta.days == 1: 
-        subsubtitle = f"It's been {delta.days} day since your last training!"
+        subtitle = f"It's been {delta.days} day since your last training!"
     else: 
-        subsubtitle = f"It's been {delta.days} days since your last training!"
-    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]), 'subsubtitle': subsubtitle }
+        subtitle = f"It's been {delta.days} days since your last training!"
+    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]) }
     return render(request, 'home.html', context)
 
 
@@ -33,7 +33,6 @@ def add_training(request):
         form = TrainingForm(request.POST or None)
         if form.is_valid():
             form.save()
-
             return redirect('/add_exercise')
     else: 
         form = TrainingForm(request.POST or None)
@@ -72,11 +71,11 @@ def add_exercise(request):
 
 def training_list(request):
     title = 'List of all trainings'
-    queryset = Training.objects.all()
+    queryset = Training.objects.all().order_by('-training_date')
     form = Training_list_searchForm(request.POST or None)
 
     if request.method == 'POST':
-        queryset =  Training.objects.all().filter(training_type = form['training_type'].value())
+        queryset =  Training.objects.all().filter(training_type = form['training_type'].value()).order_by('-training_date')
 
     context = { 'title': title, 'form':form,  'queryset': queryset}
     return render(request, 'training_list.html', context)
@@ -84,9 +83,10 @@ def training_list(request):
 
 
 def training_list_redirect(request, id=None):
-    title = f'Training: {id}'
     queryset = Exercise.objects.filter(training_ID = id)
-
+    x = Training_type.objects.values().filter(id = Training.objects.values().filter(training_ID = id)[0]['training_type_id'])[0]['training_type']
+    y = Training.objects.values().filter(training_ID = Training.objects.values().filter(training_ID = id)[0]['training_ID'])[0]['training_date'].strftime(' %d. %b %Y')
+    title = f'{x}, {y}'
     context = {'title': title, 'queryset':queryset}
     return render(request, 'exercise_list.html', context)
     
@@ -103,6 +103,6 @@ def dashboard(request):
                'plot2': plot_histograms_reps(), 
                'plot3': plot_histograms_reppset(), 
                'plot4': plot_histograms_days(),
-               'plot5': plot_histograms_types(),
+               'plot5': plot_bar_types(),
                'title':title}
     return render(request, 'dashboard.html', context)

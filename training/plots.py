@@ -49,6 +49,9 @@ def plot_histograms_exercise():
        
        })
     fig.update_layout(margin=dict(l=0, r=0))
+    fig.update_traces(textposition='outside')
+    fig.update_layout(uniformtext_minsize=8)
+    fig.update_layout(xaxis_tickangle=45)
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config )
     return plot_div
@@ -165,8 +168,34 @@ def plot_histograms_types():
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
+def plot_bar_types():
+    training = []
+    sum_ = []
 
+    # histogram - number training types 
+    for e in range(len(Training_type.objects.all())):
+        training.append(Training_type.objects.values('training_type')[e]['training_type'])
+        temp = Training.objects.filter(training_type = e+1).count()
+        sum_.append(0 if temp is None else temp)
 
+    # convert to df 
+    df = pd.DataFrame({'training_type': training,'frequency': sum_})
+    df.sort_values('frequency', inplace=True, ascending = False)
+    
+    #plot and save 
+    fig = px.pie(df, values='frequency', names='training_type', title= 'Frequency per training type:', 
+                hover_name = 'frequency', hover_data = {'frequency': False, 'training_type': False})
+    fig.update_layout({
+       'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+       'paper_bgcolor': 'rgba(0, 0, 0, 0)',
+       })
+    fig.update_layout(showlegend=False)
+    fig.update_layout(margin=dict(l=0, r=0))
+    fig.update_traces( textinfo='label+percent', textposition='outside',
+                     textfont_size=15, marker=dict(line=dict(color='rgba(0, 0, 0, 0)', width =2)))
+    config = {'displayModeBar': False}
+    plot_div = plot(fig, output_type='div', config = config)
+    return plot_div
 
 
 # MIT LICENSE
@@ -212,15 +241,12 @@ def display_year(z,
         types.append(Training.objects.values('training_type')[i]['training_type'])
         dates.append(Training.objects.values('training_date')[i]['training_date'])
     text = ['' for i in dates_in_year] #gives something like list of strings like ‘2018-01-25’ for each date..
- 
+
     for i in range(len(dates)): 
         if dates[i] in dates_in_year: 
             x = types[i] - 1
-            # print(Training_type.objects.values('training_type')[x]['training_type'])
-            
-            text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + str(dates_in_year[dates_in_year.index(dates[i])])
 
-
+            text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + dates_in_year[dates_in_year.index(dates[i])].strftime(' %d.%m.%Y')
 
 
     #4cc417 green #347c17 dark green
@@ -281,8 +307,7 @@ def display_year(z,
                     
                     
     layout = go.Layout(
-        height=250,
-        
+        height= 400,
         yaxis=dict(
             showline=False, showgrid=False, zeroline=False,
             tickmode='array',
@@ -298,7 +323,7 @@ def display_year(z,
         ),
         font={'size':10, 'color':'black'},
         plot_bgcolor=('#fff'),
-        margin = dict(t=40),
+
         showlegend=False
     )
     
@@ -327,7 +352,8 @@ def display_years(z, years):
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        })
-    
+       
+    # fig.update_layout(margin=dict(l=0, r=0,  t= 200))
     plot_div = plot(fig, output_type='div', config=config)
     return plot_div
 
