@@ -31,9 +31,10 @@ class Exercise_name(models.Model):
         return str(self.exercise_name)
 
 
+
 class Training(models.Model):
     training_ID = models.AutoField(primary_key=True)
-    location = models.ForeignKey(Training_location, on_delete=CASCADE, default = 1)
+    location = models.ForeignKey(Training_location, on_delete=CASCADE, default = 2)
     training_date = models.DateField(default=date.today, auto_now=False)
     training_type = models.ForeignKey(Training_type, blank=False, null=True, on_delete=CASCADE)
     user_name = models.CharField(max_length=30)
@@ -47,7 +48,7 @@ class Training(models.Model):
 
 
 class Exercise(models.Model): 
-    training_ID = models.ForeignKey(Training, on_delete=CASCADE, null=True) # , default = Training.objects.values().first())
+    training_ID = models.ForeignKey(Training, on_delete=CASCADE, null=True) 
     exercise = models.ForeignKey(Exercise_name, on_delete=CASCADE, null=True)
     reps = models.IntegerField(choices=list(zip(range(1, 21), range(1, 21))), unique=False)
     user_name = models.CharField(max_length=30)

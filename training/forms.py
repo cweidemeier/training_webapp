@@ -12,12 +12,12 @@ class TrainingForm(ModelForm):
 class ExerciseForm(ModelForm):
     class Meta:
         model = Exercise
-        fields = ['training_ID', 'exercise', 'reps']
+        fields = [ 'exercise', 'reps']
 
 
 class Training_list_searchForm(ModelForm):
     class Meta: 
         model = Training
-        fields = ['training_type' ]   #, 'training_day']  #vllt ist date interessant für später
+        fields = ['training_type']   #, 'training_day']  #vllt ist date interessant für später
 
 

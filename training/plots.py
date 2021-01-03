@@ -1,9 +1,7 @@
 from .models import Exercise_name, Training, Exercise, Training_type
 
-
 # graph test 
 import pandas as pd
-
 from django.db.models import Sum
 
 
@@ -12,7 +10,7 @@ from plotly.offline import plot
 import plotly.express as px
 import plotly.graph_objs as go
 
-
+from itertools import filterfalse
 
 
 # plot activity plot 
@@ -27,22 +25,32 @@ from plotly.subplots import make_subplots
 
 
 
-def plot_histograms_exercise():
+def plot_histograms_exercise(request):
     exercise = []
     reps_sum = []
+    request = request
+    if request.user.is_authenticated:
+        query = Exercise.objects.all().filter(user_name = request.user)
+        # histogram total sets of individual exercises
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            rep = query.filter(exercise_id = e+1).count()
+            reps_sum.append(0 if rep is None else rep)
+    else: 
+        query = Exercise.objects.all().filter(user_name = 'test_user')
+        # histogram total sets of individual exercises
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            rep = query.filter(exercise_id = e+1).count()
+            reps_sum.append(0 if rep is None else rep)
 
-    # histogram for total of exercises done - vllt. noch ein fehler ? 
-    for e in range(len(Exercise_name.objects.all())):
-        exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
-        rep = Exercise.objects.filter(exercise_id = e+1).count()
-        reps_sum.append(0 if rep is None else rep)
 
     # convert to df 
-    df = pd.DataFrame({'exercise name': exercise,'reps': reps_sum})
-    df.sort_values('reps', inplace=True, ascending = False)
+    df = pd.DataFrame({'exercise name': exercise,'sets': reps_sum})
+    df.sort_values('sets', inplace=True, ascending = False)
     
     #plot and save 
-    fig = px.bar(df, x='exercise name', y='reps', opacity = 0.7, title= 'Total number of sets per exercise:', hover_name = 'exercise name', hover_data = {'reps': False, 'exercise name': False}, text = 'reps')
+    fig = px.bar(df, x='exercise name', y='sets', opacity = 0.7, title= 'Total number of sets per exercise:', hover_name = 'exercise name', hover_data = {'sets': False, 'exercise name': False}, text = 'sets')
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
@@ -57,15 +65,24 @@ def plot_histograms_exercise():
     return plot_div
 
 
-def plot_histograms_reps():
+def plot_histograms_reps(request):
     exercise = []
     reps_sum = []
+    request = request 
+    if request.user.is_authenticated:
+        # histogram for total of reps per exercise 
+        query = Exercise.objects.filter(user_name = request.user)
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            rep = query.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
+            reps_sum.append(0 if rep is None else rep)   
 
-    # # histogram for total of reps per exercise 
-    for e in range(len(Exercise_name.objects.all())):
-        exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
-        rep = Exercise.objects.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
-        reps_sum.append(0 if rep is None else rep)
+    else:
+        query = Exercise.objects.filter(user_name = 'test_user')
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            rep = query.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
+            reps_sum.append(0 if rep is None else rep)  
 
     # convert to df 
     df = pd.DataFrame({'exercise name': exercise,'reps': reps_sum})
@@ -84,20 +101,34 @@ def plot_histograms_reps():
     return plot_div
 
 
-def plot_histograms_reppset():
+def plot_histograms_reppset(request):
     exercise = []
     reps_sum = []
-
+    request = request
+    if request.user.is_authenticated:
     # # histogram for total of reps per exercise 
-    for e in range(len(Exercise_name.objects.all())):
-        exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
-        total_rep = Exercise.objects.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
-        sets = Exercise.objects.filter(exercise_id = e+1).count()
-        if sets == None or total_rep == None:
-            reppset = 0
-        else: 
-            reppset = round(total_rep/sets, 2)
-        reps_sum.append(0 if reppset is None else reppset)
+        query = Exercise.objects.filter(user_name = request.user)
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            total_rep = query.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
+            sets = query.filter(exercise_id = e+1).count()
+            if sets == None or total_rep == None:
+                reppset = 0
+            else: 
+                reppset = round(total_rep/sets, 2)
+            reps_sum.append(0 if reppset is None else reppset)
+
+    else: 
+        query = Exercise.objects.filter(user_name = 'test_user')
+        for e in range(len(Exercise_name.objects.all())):
+            exercise.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
+            total_rep = query.filter(exercise = e+1).aggregate(Sum('reps'))['reps__sum']
+            sets = query.filter(exercise_id = e+1).count()
+            if sets == None or total_rep == None:
+                reppset = 0
+            else: 
+                reppset = round(total_rep/sets, 2)
+            reps_sum.append(0 if reppset is None else reppset)
 
     # convert to df 
     df = pd.DataFrame({'exercise name': exercise,'reps': reps_sum})
@@ -117,13 +148,21 @@ def plot_histograms_reppset():
 
 
 
-def plot_histograms_days():
+def plot_histograms_days(request):
+    request = request 
     # # histogram for total of reps per exercise 
     weekDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
     dic = {weekDays[i]:0 for i in range(7)}
-    for i in range(len(Training.objects.all())):
-        dic[f'{weekDays[Training.objects.values_list("training_date")[i][0].weekday()]}'] += 1
+    if request.user.is_authenticated:
+        query = Training.objects.all().filter(user_name=request.user)
+        for i in range(len(query)):
+            dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
 
+    else: 
+        query = Training.objects.all().filter(user_name='test_user')
+        for i in range(len(query)):
+            dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
+            
     # convert to df 
     df = pd.DataFrame()
     df['weekdays']  = dic.keys()
@@ -142,44 +181,78 @@ def plot_histograms_days():
 
 
 
-def plot_histograms_types():
-    training = []
-    sum_ = []
+# def plot_histograms_types(request):
+#     training = []
+#     sum_ = []
+#     request = request
+#     # histogram - number training types 
+#     if request.user.is_authenticated:
+#         query = Training.objects.all().filter(user_name=request.user)
+#         print(query)
+#         for e in range(len(query)):
+#             training.append(Training_type.objects.values('training_type')[e]['training_type'])
+#             temp = query.filter(training_type = e+1).count()
+#             sum_.append(0 if temp is None else temp)
 
-    # histogram - number training types 
-    for e in range(len(Training_type.objects.all())):
-        training.append(Training_type.objects.values('training_type')[e]['training_type'])
-        temp = Training.objects.filter(training_type = e+1).count()
-        sum_.append(0 if temp is None else temp)
+#     else:
+#         for e in range(len(Training_type.objects.all())):
+#             training.append(Training_type.objects.values('training_type')[e]['training_type'])
+#             temp = Training.objects.filter(training_type = e+1).count()
+#             sum_.append(0 if temp is None else temp)
 
-    # convert to df 
-    df = pd.DataFrame({'training_type': training,'frequency': sum_})
-    df.sort_values('frequency', inplace=True, ascending = False)
+#     # convert to df 
+#     df = pd.DataFrame({'training_type': training,'frequency': sum_})
+#     df.sort_values('frequency', inplace=True, ascending = False)
     
-    #plot and save 
-    fig = px.bar(df, x='training_type', y='frequency', opacity = 0.7, title= 'Frequency per training type:', hover_name = 'training_type', hover_data = {'frequency': False, 'training_type': False}, text = 'frequency')
-    fig.update_layout({
-       'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-       'paper_bgcolor': 'rgba(0, 0, 0, 0)',
+#     #plot and save 
+#     fig = px.bar(df, x='training_type', y='frequency', opacity = 0.7, title= 'Frequency per training type:', hover_name = 'training_type', hover_data = {'frequency': False, 'training_type': False}, text = 'frequency')
+#     fig.update_layout({
+#        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+#        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        
-       })
-    fig.update_layout(margin=dict(l=0, r=0))
-    config = {'displayModeBar': False}
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
-    return plot_div
+#        })
+#     fig.update_layout(margin=dict(l=0, r=0))
+#     config = {'displayModeBar': False}
+#     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
+#     return plot_div
 
-def plot_bar_types():
+
+
+
+def plot_bar_types(request):
     training = []
     sum_ = []
+    request = request
 
     # histogram - number training types 
-    for e in range(len(Training_type.objects.all())):
-        training.append(Training_type.objects.values('training_type')[e]['training_type'])
-        temp = Training.objects.filter(training_type = e+1).count()
-        sum_.append(0 if temp is None else temp)
+    if request.user.is_authenticated:
+        query = Training.objects.all().filter(user_name=request.user)
+        print(query)
+        for e in range(len(Training_type.objects.all())):
+            training.append(Training_type.objects.values('training_type')[e]['training_type'])
+            temp = query.filter(training_type = e+1).count()
+            sum_.append(0 if temp is None else temp)
+
+    else: 
+        query = Training.objects.all().filter(user_name='test_user')
+        print(query)
+        for e in range(len(Training_type.objects.all())):
+            training.append(Training_type.objects.values('training_type')[e]['training_type'])
+            temp = query.filter(training_type = e+1).count()
+            sum_.append(0 if temp is None else temp)
+
+    # can be implemented in a better way. 
+    sum_2 = []
+    training_2 = []
+    for i in range(len(sum_)): 
+        if sum_[i] != 0:
+            sum_2.append(sum_[i])
+            training_2.append(training[i])
+            
+
 
     # convert to df 
-    df = pd.DataFrame({'training_type': training,'frequency': sum_})
+    df = pd.DataFrame({'training_type': training_2,'frequency': sum_2})
     df.sort_values('frequency', inplace=True, ascending = False)
     
     #plot and save 
@@ -199,7 +272,7 @@ def plot_bar_types():
 
 
 # MIT LICENSE
-def display_year(z,
+def display_year(z,request,
                  year: int = None,
                  month_lines: bool = True,
                  fig=None,
@@ -235,12 +308,25 @@ def display_year(z,
     weeknumber_of_dates = [int(i.strftime("%V")) if not (int(i.strftime("%V")) == 1 and i.month == 12) else 53
                            for i in dates_in_year] #gives [1,1,1,1,1,1,1,2,2,2,2,2,2,2,…] name is self-explanatory
 
+    request = request 
     types = []
     dates = []
-    for i in range(len(Training.objects.values('training_date', 'training_type'))):
-        types.append(Training.objects.values('training_type')[i]['training_type'])
-        dates.append(Training.objects.values('training_date')[i]['training_date'])
+
+    if request.user.is_authenticated:
+        query = Training.objects.all().filter(user_name=request.user)
+        for i in range(len(query)):
+            types.append(Training.objects.values('training_type')[i]['training_type'])
+            dates.append(query.values('training_date')[i]['training_date'])
+
+    else: 
+        query = Training.objects.all().filter(user_name='test_user')
+        for i in range(len(query)):
+            types.append(Training.objects.values('training_type')[i]['training_type'])
+            dates.append(query.values('training_date')[i]['training_date'])
+
+
     text = ['' for i in dates_in_year] #gives something like list of strings like ‘2018-01-25’ for each date..
+
 
     for i in range(len(dates)): 
         if dates[i] in dates_in_year: 
@@ -340,12 +426,13 @@ def display_year(z,
     return fig
 
 
-def display_years(z, years):
+def display_years(z, years, request):
+    request = request 
     fig = make_subplots(rows=len(years), cols=1, subplot_titles=years)
     for i, year in enumerate(years):
         data = z[i*365 : (i+1)*365]
-        display_year(data, year=year, fig=fig, row=i)
-    
+        display_year(data, request, year=year, fig=fig, row=i)
+        
     config = {'displayModeBar': False}
 
     fig.update_layout({
@@ -361,10 +448,19 @@ def display_years(z, years):
 
 
 # Function that returns a 0-list with ones, when the day was a training day. 
-def get_training_days(): 
+def get_training_days(request):
+    request = request  
     dates = []
-    for i in range(len(Training.objects.values('training_date'))):
-        dates.append(Training.objects.values('training_date')[i]['training_date'])
+    if request.user.is_authenticated:
+        query = Training.objects.values('training_date').filter(user_name= request.user)
+        
+        for i in range(len(query)):
+            dates.append(query.values('training_date')[i]['training_date'])
+
+    else: 
+        query = Training.objects.values('training_date').filter(user_name= 'test_user')
+        for i in range(len(query)):
+            dates.append(query.values('training_date')[i]['training_date'])
 
     sdate = date(datetime.datetime.now().year, 1, 1)   # start date
     edate = date(datetime.datetime.now().year, 12, 31)   # end date
@@ -381,5 +477,4 @@ def get_training_days():
             this_year[i] = 1 
         else: 
             this_year[i] = 0 
-
     return this_year

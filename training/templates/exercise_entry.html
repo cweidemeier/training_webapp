@@ -49,6 +49,7 @@
 <main role="main" class="container">
   <div class="jumbotron">
     <h1 class='title'>{{title}}</h1>
+    
     <form method='post' action=''>
         {% csrf_token %}
         {{form|crispy}}
@@ -57,7 +58,9 @@
     </form>
 
 
-
+    <br>
+    <br>
+  <a href='/training_list'  style='color: black'><i> *Edit an existing training </i></a>
   </div>
 
 

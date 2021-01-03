@@ -1,4 +1,4 @@
-from dash.dependencies import Output
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import TrainingForm, ExerciseForm, Training_list_searchForm
 from .models import Exercise_name, Training, Exercise
@@ -7,36 +7,50 @@ from .models import Exercise_name, Training, Exercise
 from .plots import * 
 from datetime import date
 
-
-
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 
 
 
 def home(request):
-    title = 'Welcome to TRAIN WITH CanDyman'
+    # noch was rein, wenn kein training drinnen ist. nonetype not subscriptable
+    if request.user.is_authenticated:
+        title = f'Welcome {request.user}'
+        subsubtitle = ''
+        query = Training.objects.all().filter(user_name = request.user)
+        if len(query) != 0:
+            last_training = query.values().order_by('-training_date').first()['training_date']
+        else: 
+            last_training = date.today()
+    else: 
+        title = f'Welcome test_user'
+        subsubtitle = 'You are not logged in. You will only see example data!'
+        query = Training.objects.all().filter(user_name = 'test_user')
+        last_training = query.values().order_by('-training_date').first()['training_date']
+    
+
     today = date.today()
-    last_training = Training.objects.values().order_by('-training_date').first()['training_date']
     delta = today - last_training
+
     if delta.days == 1: 
         subtitle = f"It's been {delta.days} day since your last training!"
     else: 
         subtitle = f"It's been {delta.days} days since your last training!"
-    context = { 'title': title,  'subtitle':subtitle, 'plot_act': display_years(get_training_days(), [datetime.datetime.now().year]) }
+
+    context = { 'title': title,  'subtitle':subtitle, 'subsubtitle': subsubtitle,  'plot_act': display_years(get_training_days(request), [datetime.datetime.now().year], request) }
     return render(request, 'base.html', context)
 
 
 
 
 def add_training(request):
-    title = 'Add Training'
+    title = 'Add training'
     if request.user.is_authenticated:
         form = TrainingForm(request.POST or None)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user_name = request.user
             obj.save()
-            
             return redirect('/add_exercise')
     else: 
         form = TrainingForm(request.POST or None)
@@ -47,19 +61,24 @@ def add_training(request):
 
 
 
+
+
 def add_exercise(request):
-    title = 'Add Exercise'
+    title = 'Add exercise to last training'
     if request.user.is_authenticated:
-        form = ExerciseForm(request.POST or None, initial=Training.objects.values().first())
+        query = Training.objects.all().filter(user_name = request.user)
+        form = ExerciseForm(request.POST or None, initial=query.values().first())
         if  request.method == 'POST' and 'save' in request.POST:
             if form.is_valid():
                 obj = form.save(commit=False)
+                obj.training_ID = Training.objects.get(training_ID = query.values().first()['training_ID'])
                 obj.user_name = request.user
                 obj.save()
                 return redirect('/add_exercise')
         if  request.method == 'POST' and 'finish' in request.POST:
             if form.is_valid():
                 obj = form.save(commit=False)
+                obj.training_ID = Training.objects.get(training_ID = query.values().first()['training_ID'])
                 obj.user_name = request.user
                 obj.save()
                 return redirect('/')
@@ -77,27 +96,73 @@ def add_exercise(request):
 
 
 
-def training_list(request):
-    title = 'List of all trainings'
-    queryset = Training.objects.all().order_by('-training_date')
-    form = Training_list_searchForm(request.POST or None)
 
-    if request.method == 'POST':
-        queryset =  Training.objects.all().filter(training_type = form['training_type'].value()).order_by('-training_date')
+def training_list(request):
+    title = 'Your Workouts'
+    if request.user.is_authenticated:
+        queryset = Training.objects.all().order_by('-training_date').filter(user_name=request.user)
+        form = Training_list_searchForm(request.POST or None)
+        if request.method == 'POST':
+            queryset = queryset.filter(training_type = form['training_type'].value())
+    else: 
+        queryset = Training.objects.all().order_by('-training_date').filter(user_name='test_user')
+        form = Training_list_searchForm(request.POST or None)
+        if request.method == 'POST':
+            queryset = queryset.filter(training_type = form['training_type'].value())
 
     context = { 'title': title, 'form':form,  'queryset': queryset}
     return render(request, 'training_list.html', context)
 
 
 
-def training_list_redirect(request, id=None):
+def training_edit(request, id=None, username= None):  
+    form = ExerciseForm(request.POST or None)
+    a = Training.objects.get(training_ID = id)
+    if request.user.is_authenticated:
+        if  request.method == 'POST':
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.training_ID = a
+                instance.user_name = username
+                instance.save()
+                return redirect(f'/training_list/{username}/{id}')
+                
+    context = {
+    "title": 'add exercise',
+    "form": form, 
+    }
+ 
+    return render(request, "exercise_entry_2.html", context)
+
+
+@login_required(login_url='/training_list')
+def training_delete(request, id=None):
+   instance = get_object_or_404(Training, training_ID=id)
+   instance.delete()
+   return redirect("/training_list")
+
+
+
+def training_list_redirect(request, id=None, username = None):
+    username = request.user
     queryset = Exercise.objects.filter(training_ID = id)
     x = Training_type.objects.values().filter(id = Training.objects.values().filter(training_ID = id)[0]['training_type_id'])[0]['training_type']
     y = Training.objects.values().filter(training_ID = Training.objects.values().filter(training_ID = id)[0]['training_ID'])[0]['training_date'].strftime(' %d. %b %Y')
     title = f'{x}, {y}'
-    context = {'title': title, 'queryset':queryset}
+
+    link = f'/training_list/{username}/{id}_edit'
+    context = {'title': title, 'queryset':queryset, "link": link }
     return render(request, 'exercise_list.html', context)
     
+
+
+@login_required(login_url='/training_list')
+def exercise_delete(request, id, username):
+    instance = get_object_or_404(Exercise, id = id)
+    instance.delete()
+    return redirect(f"/training_list/{username}/{id}")
+
+
 
 @permission_required('training.add_choice', login_url='/')
 def todo(request):
@@ -105,12 +170,12 @@ def todo(request):
 
 
 
-def dashboard(request):
-    title = 'Some stats'
-    context = {'plot1': plot_histograms_exercise(), 
-               'plot2': plot_histograms_reps(), 
-               'plot3': plot_histograms_reppset(), 
-               'plot4': plot_histograms_days(),
-               'plot5': plot_bar_types(),
+def dashboard(request): 
+    title = 'Your workouts in plots'
+    context = {'plot1': plot_histograms_exercise(request), 
+               'plot2': plot_histograms_reps(request), 
+               'plot3': plot_histograms_reppset(request), 
+               'plot4': plot_histograms_days(request),
+               'plot5': plot_bar_types(request),
                'title':title}
     return render(request, 'dashboard.html', context)

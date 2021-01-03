@@ -1,15 +1,19 @@
 {% extends "registration/registration_base.html" %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
-<p style = 'text-align: center;'>
-{% block title %}{% trans "Register for an account" %}{% endblock %}
-</p>
+{% block title %} 
+<h3 ><p>Registration is currently closed</h3> </p>
+{% endblock %}
+
 {% block content %}
-<form method="post" action="" style = 'text-align: center;'>
+
+<form method="post" action="" style = 'width: 50%'>
     {% csrf_token %}
-    {{ form.as_p }}
+    {{form|crispy}}
     <input type="submit" value="{% trans 'Submit' %}" />
 </form>
+
 {% endblock %}
 
 

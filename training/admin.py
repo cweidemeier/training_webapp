@@ -6,13 +6,13 @@ from .forms import TrainingForm, ExerciseForm
 # Register your models here.
 
 class TrainingAdmin(admin.ModelAdmin):
-    list_display = ['training_type', 'location', 'training_date', 'user_name']
+    list_display = ['training_ID', 'training_type', 'location', 'training_date', 'user_name' ]
     form = TrainingForm
     list_filter = ['training_type', 'location']
 
 
 class ExerciseAdmin(admin.ModelAdmin):
-    list_display = ['training_ID', 'exercise', 'reps']
+    list_display = ['id', 'training_ID', 'exercise', 'reps', 'user_name']
     form = ExerciseForm
     list_filter = ['training_ID', 'exercise']
 

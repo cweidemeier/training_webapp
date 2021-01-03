@@ -151,7 +151,6 @@ PLOTLY_COMPONENTS = [
     'dash_core_components',
     'dash_html_components',
     'dash_renderer',
-
     'dpd_components',
 
 ]
@@ -175,3 +174,8 @@ ACCOUNT_ACTIVATION_DAYS = 2 # One-week activation window
 REGISTRATION_AUTO_LOGIN = True # Automatically log the user in.
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
+
+
+REGISTRATION_OPEN = False
+
+# EMail 
