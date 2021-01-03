@@ -158,9 +158,10 @@ def training_list_redirect(request, id=None, username = None):
 
 @login_required(login_url='/training_list')
 def exercise_delete(request, id, username):
+    training_id = Exercise.objects.values().filter(id = id)[0]['training_ID_id']
     instance = get_object_or_404(Exercise, id = id)
     instance.delete()
-    return redirect(f"/training_list/{username}/{id}")
+    return redirect(f"/training_list/{username}/{training_id}")
 
 
 
