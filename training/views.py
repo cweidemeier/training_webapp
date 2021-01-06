@@ -51,7 +51,9 @@ def add_training(request):
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user_name = request.user
-            obj.training_time = datetime.now().time().strftime("%H:%M")
+            print(obj.training_date, datetime.today().date(), obj.training_date == datetime.today().date())
+            if obj.training_date == datetime.today().date():
+                obj.training_time = datetime.now().time().strftime("%H:%M")
             obj.save()
             return redirect('/add_exercise')
     else: 

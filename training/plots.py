@@ -63,6 +63,7 @@ def plot_histograms_exercise(request):
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
     fig.update_traces(cliponaxis=False)
+    fig.update_xaxes( title=None)
     fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config )
@@ -105,6 +106,7 @@ def plot_histograms_reps(request):
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
     fig.update_traces(cliponaxis=False)
+    fig.update_xaxes( title=None)
     fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -156,6 +158,7 @@ def plot_histograms_reppset(request):
     fig.update_traces(cliponaxis=False)
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
+    fig.update_xaxes( title=None)
     fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -485,9 +488,9 @@ def plot_heatmap_week(request):
     
     
     if request.user.is_authenticated:
-        query = Training.objects.all().filter(user_name = request.user)
+        query = Training.objects.all().filter(user_name = request.user).exclude(training_time__isnull=True)
     else: 
-        query = Training.objects.all().filter(user_name = 'test_user')
+        query = Training.objects.all().filter(user_name = 'test_user').exclude(training_time__isnull=True)
 
 
     timeslots =  pd.date_range("07:30", "20:30", freq="60min").time
