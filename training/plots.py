@@ -9,8 +9,9 @@ from django.db.models import Sum
 from plotly.offline import plot
 import plotly.express as px
 import plotly.graph_objs as go
+from plotly.colors import n_colors
 
-from itertools import filterfalse
+
 
 
 # plot activity plot 
@@ -18,6 +19,7 @@ import datetime
 from datetime import timedelta, date
 import numpy as np
 from plotly.subplots import make_subplots
+
 
 
 
@@ -60,6 +62,8 @@ def plot_histograms_exercise(request):
     fig.update_traces(textposition='outside')
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
+    fig.update_traces(cliponaxis=False)
+    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config )
     return plot_div
@@ -97,6 +101,11 @@ def plot_histograms_reps(request):
         })
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
+    fig.update_traces(textposition='outside')
+    fig.update_layout(uniformtext_minsize=8)
+    fig.update_layout(xaxis_tickangle=45)
+    fig.update_traces(cliponaxis=False)
+    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
@@ -143,11 +152,16 @@ def plot_histograms_reppset(request):
         })
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
+    fig.update_traces(textposition='outside')
+    fig.update_traces(cliponaxis=False)
+    fig.update_layout(uniformtext_minsize=8)
+    fig.update_layout(xaxis_tickangle=45)
+    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
 
-
+# currently not in use 
 def plot_histograms_days(request):
     request = request 
     # # histogram for total of reps per exercise 
@@ -169,52 +183,16 @@ def plot_histograms_days(request):
     df['frequency'] = dic.values()
 
     #plot and save 
-    fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
+    fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, cliponaxis=False ,title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
     fig.update_layout({
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         })
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
+    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
     return plot_div
-
-
-
-# def plot_histograms_types(request):
-#     training = []
-#     sum_ = []
-#     request = request
-#     # histogram - number training types 
-#     if request.user.is_authenticated:
-#         query = Training.objects.all().filter(user_name=request.user)
-#         print(query)
-#         for e in range(len(query)):
-#             training.append(Training_type.objects.values('training_type')[e]['training_type'])
-#             temp = query.filter(training_type = e+1).count()
-#             sum_.append(0 if temp is None else temp)
-
-#     else:
-#         for e in range(len(Training_type.objects.all())):
-#             training.append(Training_type.objects.values('training_type')[e]['training_type'])
-#             temp = Training.objects.filter(training_type = e+1).count()
-#             sum_.append(0 if temp is None else temp)
-
-#     # convert to df 
-#     df = pd.DataFrame({'training_type': training,'frequency': sum_})
-#     df.sort_values('frequency', inplace=True, ascending = False)
-    
-#     #plot and save 
-#     fig = px.bar(df, x='training_type', y='frequency', opacity = 0.7, title= 'Frequency per training type:', hover_name = 'training_type', hover_data = {'frequency': False, 'training_type': False}, text = 'frequency')
-#     fig.update_layout({
-#        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-#        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-       
-#        })
-#     fig.update_layout(margin=dict(l=0, r=0))
-#     config = {'displayModeBar': False}
-#     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
-#     return plot_div
 
 
 
@@ -227,7 +205,6 @@ def plot_bar_types(request):
     # histogram - number training types 
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name=request.user)
-        print(query)
         for e in range(len(Training_type.objects.all())):
             training.append(Training_type.objects.values('training_type')[e]['training_type'])
             temp = query.filter(training_type = e+1).count()
@@ -235,7 +212,6 @@ def plot_bar_types(request):
 
     else: 
         query = Training.objects.all().filter(user_name='test_user')
-        print(query)
         for e in range(len(Training_type.objects.all())):
             training.append(Training_type.objects.values('training_type')[e]['training_type'])
             temp = query.filter(training_type = e+1).count()
@@ -264,9 +240,14 @@ def plot_bar_types(request):
        })
     fig.update_layout(showlegend=False)
     fig.update_layout(margin=dict(l=0, r=0))
-    fig.update_traces( textinfo='label+percent', textposition='outside',
-                     textfont_size=15, marker=dict(line=dict(color='rgba(0, 0, 0, 0)', width =2)))
+    fig.update_traces( textinfo='label+percent', textposition='outside', 
+                     textfont_size=14, marker=dict(line=dict(color='rgba(0, 0, 0, 0)', width =2)))
     config = {'displayModeBar': False}
+    
+    fig.update_layout(
+        hoverlabel=dict(bgcolor="black"),
+        font=dict(family="Courier New, monospace", size=14 ))
+
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
@@ -307,6 +288,16 @@ def display_year(z,request,
     
     weeknumber_of_dates = [int(i.strftime("%V")) if not (int(i.strftime("%V")) == 1 and i.month == 12) else 53
                            for i in dates_in_year] #gives [1,1,1,1,1,1,1,2,2,2,2,2,2,2,…] name is self-explanatory
+
+
+    # first x days of year y belong to last week of year y-1. set to week 0 to have them at the start of the new year. 
+    for j in range(7): 
+        if weeknumber_of_dates[j] != 1: 
+            weeknumber_of_dates[j] = 0 
+        else: 
+            break 
+
+
 
     request = request 
     types = []
@@ -438,8 +429,8 @@ def display_years(z, years, request):
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-       })
-       
+        })
+    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
     # fig.update_layout(margin=dict(l=0, r=0,  t= 200))
     plot_div = plot(fig, output_type='div', config=config)
     return plot_div
@@ -478,3 +469,90 @@ def get_training_days(request):
         else: 
             this_year[i] = 0 
     return this_year
+
+
+
+
+
+
+def plot_heatmap_week(request):
+    # label 
+    timeslot = [x for x in range(8,20)]
+    weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+    # data
+    frequency = [[0 for x in range(1,8)] for y in range(1,13)]
+    
+    
+    if request.user.is_authenticated:
+        query = Training.objects.all().filter(user_name = request.user)
+    else: 
+        query = Training.objects.all().filter(user_name = 'test_user')
+
+
+    timeslots =  pd.date_range("07:30", "20:30", freq="60min").time
+
+    for i in range(len(query)): 
+        ind_day = query.values()[i]['training_date'].weekday()  # index tag erstes element 
+        for j in range(len(timeslots)): 
+            if query.values()[i]['training_time'] <= timeslots[j]: 
+                frequency[j-1][ind_day] += 1 
+                break
+
+    # flatten list for colorscale 
+    output = []
+    def reemovNestings(l): 
+        for i in l: 
+            if type(i) == list: 
+                reemovNestings(i) 
+            else: 
+                output.append(i)
+        return set(output) 
+    frequency_ = list(reemovNestings(frequency))
+
+    
+    text = [[0 for x in range(1,8)] for y in range(1,13)]
+    for i in range(len(text)): 
+        for j in range(len(text[i])):
+            if frequency[i][j] == 0: 
+                text[i][j] = ''
+            else: 
+                text[i][j] = f'{timeslot[i]}:00 -  {frequency[i][j]}'
+    
+    # color scale 
+    blues = n_colors('rgb(200, 200, 255)', 'rgb(0, 0, 200)', np.max(frequency_)+1, colortype='rgb')
+    blues[0] = 'rgba(0,0,0,0)'  # zero is transparent
+
+    fig = go.Figure()
+    fig.add_trace(go.Heatmap(
+        x = weekdays,
+        y = timeslot,
+        z = frequency,
+        colorscale=np.array(blues)[frequency_],
+        text=text,
+        hoverinfo='text',
+
+    ))
+    fig.update_layout(
+        #xaxis_title="Day of week",
+        yaxis_title="Time of day",
+        title = 'Workout times:',
+        xaxis = {'showgrid': False },
+        yaxis = {'showgrid': False },
+        font=dict(
+            family="Courier New, monospace",
+            size=14, 
+        )
+    )
+    fig.update_layout({
+       'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+       'paper_bgcolor': 'rgba(0, 0, 0, 0)',
+       })
+    fig.update_layout(hovermode='x')
+
+    fig['layout']['yaxis']['autorange'] = "reversed"
+    fig.update_xaxes(side="top")
+    config = {'displayModeBar': False}
+    fig.update_layout(margin=dict(l=0, r=0))
+    plot_div = plot(fig, output_type='div', config = config)
+    return plot_div

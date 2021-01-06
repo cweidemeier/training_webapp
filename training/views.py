@@ -6,6 +6,7 @@ from .models import Exercise_name, Training, Exercise
 # import plot functions from plots.py 
 from .plots import * 
 from datetime import date
+from datetime import datetime 
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
@@ -24,7 +25,7 @@ def home(request):
             last_training = date.today()
     else: 
         title = f'Welcome test_user'
-        subsubtitle = 'You are not logged in. You will only see example data!'
+        subsubtitle = 'You are not logged in. This is an example!'
         query = Training.objects.all().filter(user_name = 'test_user')
         last_training = query.values().order_by('-training_date').first()['training_date']
     
@@ -37,7 +38,7 @@ def home(request):
     else: 
         subtitle = f"It's been {delta.days} days since your last training!"
 
-    context = { 'title': title,  'subtitle':subtitle, 'subsubtitle': subsubtitle,  'plot_act': display_years(get_training_days(request), [datetime.datetime.now().year], request) }
+    context = { 'title': title,  'subtitle':subtitle, 'subsubtitle': subsubtitle,  'plot_act': display_years(get_training_days(request), [datetime.now().year], request) }
     return render(request, 'base.html', context)
 
 
@@ -50,6 +51,7 @@ def add_training(request):
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user_name = request.user
+            obj.training_time = datetime.now().time().strftime("%H:%M")
             obj.save()
             return redirect('/add_exercise')
     else: 
@@ -82,6 +84,7 @@ def add_exercise(request):
                 obj.user_name = request.user
                 obj.save()
                 return redirect('/')
+
     else:
         form = ExerciseForm(request.POST or None, initial=Training.objects.values().first())
         if  request.method == 'POST' and 'save' in request.POST:
@@ -173,10 +176,10 @@ def todo(request):
 
 def dashboard(request): 
     title = 'Your workouts in plots'
-    context = {'plot1': plot_histograms_exercise(request), 
-               'plot2': plot_histograms_reps(request), 
-               'plot3': plot_histograms_reppset(request), 
-               'plot4': plot_histograms_days(request),
-               'plot5': plot_bar_types(request),
+    context = {'plot3': plot_histograms_exercise(request), 
+               'plot5': plot_histograms_reps(request), 
+               'plot4': plot_histograms_reppset(request), 
+               'plot1': plot_bar_types(request),
+               'plot2': plot_heatmap_week(request),
                'title':title}
     return render(request, 'dashboard.html', context)

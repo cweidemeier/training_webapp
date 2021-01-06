@@ -6,7 +6,7 @@ from .forms import TrainingForm, ExerciseForm
 # Register your models here.
 
 class TrainingAdmin(admin.ModelAdmin):
-    list_display = ['training_ID', 'training_type', 'location', 'training_date', 'user_name' ]
+    list_display = ['training_ID', 'training_type', 'location', 'training_date', 'training_time', 'user_name' ]
     form = TrainingForm
     list_filter = ['training_type', 'location']
 

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Jekyll v3.8.6">
-    <title>Some Plots</title>
+    <title>Dashboard</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/navbar-fixed/">
     <!-- Plotly Script -->
@@ -80,14 +80,14 @@
                    value="trainingtype" checked> training type</label>                                  
     </div> 
 
-    <div class="sets selectt"> 
+    <div class="sets selectt" style = 'width: 75%'> 
       {{ plot1 | safe}} </div> 
-    <div class="reps selectt"> 
-      {{ plot2 | safe}}</div> 
+    <div class="reps selectt"  > 
+      {{ plot2 | safe}}</div>  
     <div class="Areps selectt"> 
       {{ plot3 | safe}}</div> 
     <div class="weekday selectt"> 
-        {{ plot4 | safe}}</div> 
+      {{ plot4 | safe}}</div> 
     <div class="trainingtype selectt"> 
       {{ plot5 | safe}}</div> 
     <script type="text/javascript"> 
