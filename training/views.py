@@ -38,7 +38,11 @@ def home(request):
     else: 
         subtitle = f"It's been {delta.days} days since your last training!"
 
-    context = { 'title': title,  'subtitle':subtitle, 'subsubtitle': subsubtitle,  'plot_act': display_years(get_training_days(request), [datetime.now().year], request) }
+    context = { 'title': title,  
+    'subtitle':subtitle, 
+    'subsubtitle': subsubtitle, 
+    'plot_act': display_years(get_training_days(request), [datetime.now().year], request),
+    'username': request.user }
     return render(request, 'base.html', context)
 
 
@@ -60,7 +64,7 @@ def add_training(request):
         form = TrainingForm(request.POST or None)
         if form.is_valid():
             return redirect('/add_exercise')
-    context = { 'title': title , 'form': form}
+    context = { 'title': title , 'form': form, 'username': request.user}
     return render(request, 'training_entry.html', context) 
 
 
@@ -96,7 +100,7 @@ def add_exercise(request):
             if form.is_valid():
                 return redirect('/')
 
-    context = { 'title': title , 'form': form}
+    context = { 'title': title , 'form': form, 'username': request.user}
     return render(request, 'exercise_entry.html', context) 
 
 
@@ -115,7 +119,7 @@ def training_list(request):
         if request.method == 'POST':
             queryset = queryset.filter(training_type = form['training_type'].value())
 
-    context = { 'title': title, 'form':form,  'queryset': queryset}
+    context = { 'title': title, 'form':form,  'queryset': queryset, 'username': request.user}
     return render(request, 'training_list.html', context)
 
 
@@ -134,7 +138,8 @@ def training_edit(request, id=None, username= None):
                 
     context = {
     "title": 'add exercise',
-    "form": form, 
+    "form": form,
+    'username': request.user
     }
  
     return render(request, "exercise_entry_2.html", context)
@@ -156,7 +161,7 @@ def training_list_redirect(request, id=None, username = None):
     title = f'{x}, {y}'
 
     link = f'/training_list/{username}/{id}_edit'
-    context = {'title': title, 'queryset':queryset, "link": link }
+    context = {'title': title, 'queryset':queryset, "link": link, 'username': request.user}
     return render(request, 'exercise_list.html', context)
     
 
@@ -172,7 +177,7 @@ def exercise_delete(request, id, username):
 
 @permission_required('training.add_choice', login_url='/')
 def todo(request):
-    return render(request, 'Todo.html')
+    return render(request, 'Todo.html',{'username': request.user} )
 
 
 
@@ -183,5 +188,6 @@ def dashboard(request):
                'plot4': plot_histograms_reppset(request), 
                'plot1': plot_bar_types(request),
                'plot2': plot_heatmap_week(request),
-               'title':title}
+               'title':title,
+               'username': request.user}
     return render(request, 'dashboard.html', context)

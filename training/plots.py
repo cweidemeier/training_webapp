@@ -58,8 +58,9 @@ def plot_histograms_exercise(request):
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        
        })
+    fig.update_traces(marker_color='grey')
     fig.update_layout(margin=dict(l=0, r=0))
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="black"))
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
     fig.update_traces(cliponaxis=False)
@@ -102,7 +103,7 @@ def plot_histograms_reps(request):
         })
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="black"))
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
     fig.update_traces(cliponaxis=False)
@@ -146,15 +147,16 @@ def plot_histograms_reppset(request):
     df.sort_values('reps', inplace=True, ascending = False)
 
     #plot and save 
-    fig = px.bar(df, x='exercise name', y='reps', opacity = 0.7, title= 'Average reps per set:', hover_name = 'exercise name', hover_data = {'reps': False, 'exercise name': False}, text = 'reps')
+    fig = px.bar(df, x='exercise name', y='reps',opacity = 0.7, title= 'Average reps per set:', hover_name = 'exercise name', hover_data = {'reps': False, 'exercise name': False}, text = 'reps')
     fig.update_layout({
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         
         })
+    fig.update_traces(marker_color='#347c17')
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
-    fig.update_traces(textposition='outside')
+    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="black"))
     fig.update_traces(cliponaxis=False)
     fig.update_layout(uniformtext_minsize=8)
     fig.update_layout(xaxis_tickangle=45)
@@ -165,37 +167,37 @@ def plot_histograms_reppset(request):
 
 
 # currently not in use 
-def plot_histograms_days(request):
-    request = request 
-    # # histogram for total of reps per exercise 
-    weekDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-    dic = {weekDays[i]:0 for i in range(7)}
-    if request.user.is_authenticated:
-        query = Training.objects.all().filter(user_name=request.user)
-        for i in range(len(query)):
-            dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
+# def plot_histograms_days(request):
+#     request = request 
+#     # # histogram for total of reps per exercise 
+#     weekDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+#     dic = {weekDays[i]:0 for i in range(7)}
+#     if request.user.is_authenticated:
+#         query = Training.objects.all().filter(user_name=request.user)
+#         for i in range(len(query)):
+#             dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
 
-    else: 
-        query = Training.objects.all().filter(user_name='test_user')
-        for i in range(len(query)):
-            dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
+#     else: 
+#         query = Training.objects.all().filter(user_name='test_user')
+#         for i in range(len(query)):
+#             dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
             
-    # convert to df 
-    df = pd.DataFrame()
-    df['weekdays']  = dic.keys()
-    df['frequency'] = dic.values()
+#     # convert to df 
+#     df = pd.DataFrame()
+#     df['weekdays']  = dic.keys()
+#     df['frequency'] = dic.values()
 
-    #plot and save 
-    fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, cliponaxis=False ,title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
-    fig.update_layout({
-        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-        })
-    fig.update_layout(margin=dict(l=0, r=0))
-    config = {'displayModeBar': False}
-    fig.update_layout(font=dict(family="Courier New, monospace",size=14))
-    plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
-    return plot_div
+#     #plot and save 
+#     fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, cliponaxis=False ,title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
+#     fig.update_layout({
+#         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
+#         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
+#         })
+#     fig.update_layout(margin=dict(l=0, r=0))
+#     config = {'displayModeBar': False}
+#     fig.update_layout(font=dict(family="Courier New, monospace",size=14))
+#     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
+#     return plot_div
 
 
 
@@ -553,6 +555,22 @@ def plot_heatmap_week(request):
        })
     fig.update_layout(hovermode='x')
 
+    fig.add_shape(type="circle",
+        xref="x", yref="y",
+        x0=3.7, y0=12.5, x1=4.3, y1=13.5,
+        line_color="LightSeaGreen",
+    )
+    
+    fig.add_shape(type="circle",
+        xref="x", yref="y",
+        x0=3.7, y0=13.5, x1=4.3, y1=14.5,
+        line_color="LightSeaGreen",
+    )
+
+    fig.update_yaxes(
+    scaleanchor = "x",
+    scaleratio = 1)
+    
     fig['layout']['yaxis']['autorange'] = "reversed"
     fig.update_xaxes(side="top")
     config = {'displayModeBar': False}
