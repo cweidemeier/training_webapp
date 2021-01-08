@@ -11,6 +11,7 @@ urlpatterns = [
     path('todo', views.todo, name = 'todo'),
     path('training_list/<str:username>/<int:id>', views.training_list_redirect, name = 'ex'),
     path('dashboard', views.dashboard, name = 'dash'),
+    path('dashboard2', views.dashboard2, name = 'dash2'),
 
     path('training_list/<int:id>_delete', views.training_delete, name = 'delete_training'),
     path('training_list/<str:username>/<int:id>_delete', views.exercise_delete, name = 'delete_exercise'),

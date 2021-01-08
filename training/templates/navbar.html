@@ -11,13 +11,13 @@
         <li class="nav-item active">
           <a class="nav-link" href="/training_list">List</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/add_training">Start Training</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/add_exercise">Add Exercise</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/dashboard">Stats</a>
         </li>
 
@@ -28,10 +28,10 @@
           <a class="nav-link" href="/accounts/logout"> {{username}} | Logout</a>
         </li>
         {% else %}
-        <li class="nav-item" style='text-align: right;'>
+        <li class="nav-item active" style='text-align: right;'>
           <a class="nav-link" href="/accounts/login">Login</a>
         </li>
-        <li class="nav-item" style='text-align: right;'>
+        <li class="nav-item active" style='text-align: right;'>
           <a class="nav-link" href="/accounts/register">Register</a>
         </li>
         {% endif %}

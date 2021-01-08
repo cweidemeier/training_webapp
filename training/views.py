@@ -182,12 +182,22 @@ def todo(request):
 
 
 def dashboard(request): 
-    title = 'Your workouts in plots'
+    title = 'Workout statistics'
     context = {'plot3': plot_histograms_exercise(request), 
                'plot5': plot_histograms_reps(request), 
                'plot4': plot_histograms_reppset(request), 
-               'plot1': plot_bar_types(request),
+               'plot1': plot_pie_types(request),
                'plot2': plot_heatmap_week(request),
                'title':title,
                'username': request.user}
     return render(request, 'dashboard.html', context)
+
+
+
+def dashboard2(request): 
+    title = 'Workout statistics by exercise'
+    context = {'plot2': exc_per_set(request),
+               
+               'title':title,
+               'username': request.user}
+    return render(request, 'dashboard2.html', context)
