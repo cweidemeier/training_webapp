@@ -312,13 +312,14 @@ def display_year(z,request,
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name=request.user)
         for i in range(len(query)):
-            types.append(Training.objects.values('training_type')[i]['training_type'])
+            types.append(query.values('training_type')[i]['training_type'])
             dates.append(query.values('training_date')[i]['training_date'])
+            
 
     else: 
         query = Training.objects.all().filter(user_name='test_user')
         for i in range(len(query)):
-            types.append(Training.objects.values('training_type')[i]['training_type'])
+            types.append(query.values('training_type')[i]['training_type'])
             dates.append(query.values('training_date')[i]['training_date'])
 
 
@@ -329,7 +330,7 @@ def display_year(z,request,
         if dates[i] in dates_in_year: 
             x = types[i] - 1
 
-            text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + dates_in_year[dates_in_year.index(dates[i])].strftime(' %d.%m.%Y')
+            text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + dates_in_year[dates_in_year.index(dates[i])].strftime(' %d.%m.%Y') + ' '
 
 
     #4cc417 green #347c17 dark green
@@ -487,12 +488,12 @@ def get_training_days(request):
 
 def plot_heatmap_week(request):
     # label 
-    timeslot = [x for x in range(8,20)]
+    timeslot = [x for x in range(7,23)]
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     # data
-    frequency = [[0 for x in range(1,8)] for y in range(1,13)]
-    
+    frequency = [[0 for x in range(1,8)] for y in range(1,17)]
+
     
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name = request.user).exclude(training_time__isnull=True)
@@ -500,13 +501,12 @@ def plot_heatmap_week(request):
         query = Training.objects.all().filter(user_name = 'test_user').exclude(training_time__isnull=True)
 
 
-    timeslots =  pd.date_range("07:30", "20:30", freq="60min").time
-
+    timeslots =  pd.date_range("07:30", "22:30", freq="60min").time
     for i in range(len(query)): 
         ind_day = query.values()[i]['training_date'].weekday()  # index tag first element of query
         for j in range(len(timeslots)): 
             if query.values()[i]['training_time'] <= timeslots[j]: 
-                frequency[j-1][ind_day] += 1 
+                frequency[j][ind_day] += 1 
                 break
 
     # flatten list for colorscale    - max and min then delta in steps of 1. more beautiful
