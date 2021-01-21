@@ -536,27 +536,29 @@ def plot_heatmap_week(request):
     fig.layout.yaxis.fixedrange = True
     config = {'displayModeBar': False}
     fig.update_layout(margin=dict(l=0, r=0))
+
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
 
-
-
-
-
-################################################################################
-#####                   Dashboard 2                                        #####
-################################################################################
-
-
 def reps_sets(request):
-    tr = Training.objects.values('training_ID', 'training_date').filter(user_name = request.user)
-    df_tr = pd.DataFrame.from_records(tr)
- 
-    ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = request.user)
-    df_ex = pd.DataFrame.from_records(ex)
+    if request.user.is_authenticated:
+        tr = Training.objects.values('training_ID', 'training_date').filter(user_name = request.user)
+        df_tr = pd.DataFrame.from_records(tr)
+    
+        ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = request.user)
+        df_ex = pd.DataFrame.from_records(ex)
 
-    df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
+        df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
+
+    else:
+        tr = Training.objects.values('training_ID', 'training_date').filter(user_name = 'test_user')
+        df_tr = pd.DataFrame.from_records(tr)
+    
+        ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = 'test_user')
+        df_ex = pd.DataFrame.from_records(ex)
+
+        df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
 
     # list of all exercises
     exercises = []
@@ -575,7 +577,7 @@ def reps_sets(request):
     for training_id in tr_ids: 
            ex_names = df_trex.where(df_trex['training_ID'] == training_id)['exercise'].dropna().unique()
            for e in ex_names:
-                reps = (df_trex.where(df_trex['training_ID'] == training_id).dropna())
+                reps = df_trex.where(df_trex['training_ID'] == training_id).dropna()
                 sets = reps.where(reps['exercise'] == e).dropna()
                 rep_per = list(sets['reps'])
                 rep_per.insert(0, e)
