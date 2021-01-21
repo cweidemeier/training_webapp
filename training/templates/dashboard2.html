@@ -60,44 +60,11 @@
 
   <div class="jumbotron">
     <h1 class='title'>{{title}}</h1>
-    <br>
-    <h6 style = 'text-align: center;'></h6>
-    <div style="text-align:center"> 
-        <label> 
-            <input type="checkbox" name="colorCheckbox" 
-                   value="trainingtype" checked> Type </label> 
-        <label> 
-            <input type="checkbox" name="colorCheckbox" 
-                   value="weekday" checked> Weekday</label> 
-        <label> 
-            <input type="checkbox" name="colorCheckbox" 
-                   value="sets" checked> Sets</label> 
-        <label> 
-            <input type="checkbox" name="colorCheckbox" 
-                   value="Areps" checked> &Oslash; reps </label>   
-        <label> 
-            <input type="checkbox" name="colorCheckbox" 
-                   value="reps" checked> reps</label>                                  
-    </div> 
 
-    <div class="trainingtype selectt" > 
-      {{ plot1 | safe}} </div> 
-    <div class="weekday selectt"  > 
-      {{ plot2 | safe}}</div>  
-    <div class="sets selectt"> 
-      {{ plot3 | safe}}</div> 
-    <div class="Areps selectt"> 
-      {{ plot4 | safe}}</div> 
-    <div class="reps selectt"> 
-      {{ plot5 | safe}}</div> 
-    <script type="text/javascript"> 
-        $(document).ready(function() { 
-            $('input[type="checkbox"]').change(function() { 
-                var inputValue = $(this).attr("value"); 
-                $("." + inputValue).toggle(); 
-            }); 
-        }); 
-    </script> 
+    
+      {{ plot1 | safe}}
+      </div>  
+
 
 
 </main>

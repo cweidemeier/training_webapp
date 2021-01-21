@@ -1,18 +1,15 @@
+from numpy.lib.twodim_base import triu_indices
 from .models import Exercise_name, Training, Exercise, Training_type
 
 # graph test 
 import pandas as pd
 from django.db.models import Sum
 
-
 # plotly 
 from plotly.offline import plot
 import plotly.express as px
 import plotly.graph_objs as go
 from plotly.colors import n_colors
-
-
-
 
 # plot activity plot 
 import datetime
@@ -63,6 +60,7 @@ def plot_histograms_exercise(request):
     return plot_div
 
 
+
 def plot_histograms_reps(request):
     request = request 
     if request.user.is_authenticated:
@@ -101,6 +99,7 @@ def plot_histograms_reps(request):
     fig.update_layout(font=dict(family="Courier New, monospace"))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
+
 
 
 def plot_histograms_reppset(request):
@@ -150,41 +149,6 @@ def plot_histograms_reppset(request):
     fig.update_layout(font=dict(family="Courier New, monospace"))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
-
-
-# currently not in use 
-# def plot_histograms_days(request):
-#     request = request 
-#     # # histogram for total of reps per exercise 
-#     weekDays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
-#     dic = {weekDays[i]:0 for i in range(7)}
-#     if request.user.is_authenticated:
-#         query = Training.objects.all().filter(user_name=request.user)
-#         for i in range(len(query)):
-#             dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
-
-#     else: 
-#         query = Training.objects.all().filter(user_name='test_user')
-#         for i in range(len(query)):
-#             dic[f'{weekDays[query.values_list("training_date")[i][0].weekday()]}'] += 1
-            
-#     # convert to df 
-#     df = pd.DataFrame()
-#     df['weekdays']  = dic.keys()
-#     df['frequency'] = dic.values()
-
-#     #plot and save 
-#     fig = px.bar(df, x='weekdays', y='frequency', opacity = 0.7, cliponaxis=False ,title= 'Trainings per weekday:', hover_name = 'weekdays', hover_data = {'weekdays': False, 'frequency': False}, text = 'frequency')
-#     fig.update_layout({
-#         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-#         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-#         })
-#     fig.update_layout(margin=dict(l=0, r=0))
-#     config = {'displayModeBar': False}
-#     fig.update_layout(font=dict(family="Courier New, monospace",size=14))
-#     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config )
-#     return plot_div
-
 
 
 
@@ -248,13 +212,6 @@ def plot_pie_types(request):
 
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
-
-
-
-# fig = px.pie(, , , color_discrete_map={'Thur':'lightcyan',
-#                                  'Fri':'cyan',
-#                                  'Sat':'royalblue',
-#                                  'Sun':'darkblue'})
 
 
 
@@ -427,6 +384,7 @@ def display_year(z,request,
     return fig
 
 
+
 def display_years(z, years, request):
     request = request 
     fig = make_subplots(rows=len(years), cols=1, subplot_titles=years)
@@ -445,7 +403,6 @@ def display_years(z, years, request):
     # fig.update_layout(margin=dict(l=0, r=0,  t= 200))
     plot_div = plot(fig, output_type='div', config=config)
     return plot_div
-
 
 
 
@@ -480,9 +437,6 @@ def get_training_days(request):
         else: 
             this_year[i] = 0 
     return this_year
-
-
-
 
 
 
@@ -590,50 +544,127 @@ def plot_heatmap_week(request):
 
 
 
-
-
-
-
-
-
-
-
-
-
 ################################################################################
 #####                   Dashboard 2                                        #####
 ################################################################################
 
 
-
-def exc_per_set(request): 
+def reps_sets(request):
     tr = Training.objects.values('training_ID', 'training_date').filter(user_name = request.user)
     df_tr = pd.DataFrame.from_records(tr)
  
     ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = request.user)
     df_ex = pd.DataFrame.from_records(ex)
 
+    df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
 
-    test = df_tr.merge(df_ex, on='training_ID', how='left')
-    new = test.groupby(['training_date','exercise']).sum().reset_index()
-
+    # list of all exercises
     exercises = []
     for e in range(len(Exercise_name.objects.all())):
         exercises.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
     
+    # list of exercises done by user 
     exc_num = list(Exercise_name.objects.all().values('id')[i]['id'] for i in range(len(exercises)))
 
+    # replace exercise_id with actual name 
     map_dict = dict(zip(exc_num, exercises))
-    new['exercise'] = new['exercise'].map(map_dict)
+    df_trex['exercise'] = df_trex['exercise'].map(map_dict)
+    tr_ids = df_trex['training_ID'].unique() # list with training_IDs 
+    
+    master = []
+    for training_id in tr_ids: 
+           ex_names = df_trex.where(df_trex['training_ID'] == training_id)['exercise'].dropna().unique()
+           for e in ex_names:
+                reps = (df_trex.where(df_trex['training_ID'] == training_id).dropna())
+                sets = reps.where(reps['exercise'] == e).dropna()
+                rep_per = list(sets['reps'])
+                rep_per.insert(0, e)
+                rep_per.insert(0,Training.objects.values('training_date').filter(training_ID = training_id)[0]['training_date'])
+                master.append(rep_per)
+    
+    #all unique exercises by the user 
+    ex_names = df_trex['exercise'].dropna().unique()
 
-    fig = px.line(new, x="training_date", y="reps", color='exercise')
+    df = pd.DataFrame(master, columns = ['training_date','exercise','set1','set2','set3','set4','set5'])
+    
+    # get traces for each row in dataframe 
+    data1 = []
+    for i,row in df.iterrows(): 
+        data1.append(go.Scatter(x=df[['set1','set2','set3','set4','set5']].columns, y = df[['set1','set2','set3','set4','set5']].iloc[i],mode='markers'))
+    
+    # list of exercises, with duplicates
+    dataex = list(df['exercise'])
+    df['sum'] = df['set1'].fillna(0) + df['set2'].fillna(0) + df['set3'].fillna(0) + df['set4'].fillna(0) + df['set5'].fillna(0) 
+
+    data2 = []
+    # show total reps at that day
+    # for i,row in df.iterrows():
+    #     data2.append(go.Scatter(x=[df['training_date'].iloc[i]], y=[df['sum'].iloc[i]],mode='markers'))
+
+    # show individual reps.     
+    for i,row in df.iterrows():
+        data2.append(go.Scatter(x=[df['training_date'].iloc[i]]*5, y=list(df[['set1','set2','set3','set4','set5']].iloc[i]),mode='markers'))
+            
+
+    fig = make_subplots(rows=2, cols=1)
+
+    for i in data1:
+        fig.add_trace(i, row=1, col=1) 
+
+    for i in data2: 
+        fig.add_trace(i, row=2, col=1)
+
+
+    button = []
+    button.append(dict(
+                        args=["visible", [True]],
+                        label='All',
+                        method="restyle"
+                    ))
+    
+    for ex in ex_names:
+        button.append(dict(
+                            args=["visible", [ex == dataex[i] for i in range(len(dataex))]*2],
+                            label=ex,
+                            method="restyle"
+                        ))
+
+    # Add dropdown
+    updatemenus=[
+            dict(
+                buttons=button,
+                direction="down",
+                pad={"r": 10, "t": 10},
+                showactive=True,
+                x=0,
+                xanchor="left",
+                y=1.2,
+                yanchor="top",
+                bgcolor='white',
+                bordercolor='black'
+            ),
+        ]
+    fig['layout']['updatemenus'] = updatemenus
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        })
-    plot_div = plot(fig, output_type='div')
+    fig.update_layout(height=600)
+    fig.update_traces(marker_color='#347c17', marker_size = 10)
+    fig.update_layout(margin=dict(l=0, r=0))
+    config = {'displayModeBar': False}
+    fig.update_traces( hoverlabel=dict(bgcolor="black"))
+    fig.update_traces(cliponaxis=False)
+    fig.update_layout(uniformtext_minsize=8)
+    fig.update_layout(showlegend=False)
+    fig.update_yaxes( title='Repetitions')
+    fig.update_layout(yaxis=dict(range=[0,15]))
+    fig.update_layout(font=dict(family="Courier New, monospace"))
+
+    plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
 
-
-
+## yaxis range 
+## größer umso häufiger? 
+## 

@@ -188,6 +188,7 @@ def dashboard(request):
                'plot4': plot_histograms_reppset(request), 
                'plot1': plot_pie_types(request),
                'plot2': plot_heatmap_week(request),
+               'plot6': reps_sets(request),
                'title':title,
                'username': request.user}
     return render(request, 'dashboard.html', context)
@@ -196,8 +197,7 @@ def dashboard(request):
 
 def dashboard2(request): 
     title = 'Workout statistics by exercise'
-    context = {'plot2': exc_per_set(request),
-               
+    context = {'plot1': reps_sets(request),
                'title':title,
                'username': request.user}
     return render(request, 'dashboard2.html', context)
