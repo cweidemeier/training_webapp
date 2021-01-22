@@ -600,15 +600,15 @@ def reps_sets(request):
 
     data2 = []
     # show total reps at that day
-    # for i,row in df.iterrows():
-    #     data2.append(go.Scatter(x=[df['training_date'].iloc[i]], y=[df['sum'].iloc[i]],mode='markers'))
+    for i,row in df.iterrows():
+        data2.append(go.Scatter(x=[df['training_date'].iloc[i]], y=[df['sum'].iloc[i]],mode='markers'))
 
     # show individual reps.     
-    for i,row in df.iterrows():
-        data2.append(go.Scatter(x=[df['training_date'].iloc[i]]*5, y=list(df[['set1','set2','set3','set4','set5']].iloc[i]),mode='markers'))
+    # for i,row in df.iterrows():
+    #     data2.append(go.Scatter(x=[df['training_date'].iloc[i]]*5, y=list(df[['set1','set2','set3','set4','set5']].iloc[i]),mode='markers'))
             
 
-    fig = make_subplots(rows=2, cols=1)
+    fig = make_subplots(rows=2, cols=1, subplot_titles=('Repetitions per set', 'Total repetitions by day'))
 
     for i in data1:
         fig.add_trace(i, row=1, col=1) 
@@ -619,16 +619,23 @@ def reps_sets(request):
 
     button = []
     button.append(dict(
-                        args=["visible", [True]],
+                        args=[{"visible": [True]},
+                                {'yaxis.range': [0,max(df['set1']+5)], 
+                                 'yaxis2.range': [0,max(df['set1']+5)]},
+                                ],
                         label='All',
-                        method="restyle"
+                        method="update"
                     ))
     
-    for ex in ex_names:
+    for ex in ex_names:     # if - show individual res - replace 'sum' with 'set1'
         button.append(dict(
-                            args=["visible", [ex == dataex[i] for i in range(len(dataex))]*2],
+                            args=[ {"visible": [ex == dataex[i] for i in range(len(dataex))]*2}, 
+                                {'yaxis.range': [0, max(df['sum'].where(df['exercise'] == ex).dropna() +5)], 
+                                 'yaxis2.range':[0, max(df['sum'].where(df['exercise'] == ex).dropna() +5)]
+                                 },
+                                ],
                             label=ex,
-                            method="restyle"
+                            method="update"
                         ))
 
     # Add dropdown
@@ -646,23 +653,25 @@ def reps_sets(request):
                 bordercolor='black'
             ),
         ]
+
     fig['layout']['updatemenus'] = updatemenus
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        })
-    fig.update_layout(height=600)
+    fig.update_layout(height=600,
+                     margin=dict(l=0, r=0), 
+                     uniformtext_minsize=8,
+                     showlegend=False,
+                     font=dict(family="Courier New, monospace")
+                     )
+
     fig.update_traces(marker_color='#347c17', marker_size = 10)
-    fig.update_layout(margin=dict(l=0, r=0))
-    config = {'displayModeBar': False}
     fig.update_traces( hoverlabel=dict(bgcolor="black"))
     fig.update_traces(cliponaxis=False)
-    fig.update_layout(uniformtext_minsize=8)
-    fig.update_layout(showlegend=False)
-    fig.update_yaxes( title='Repetitions')
-    fig.update_layout(yaxis=dict(range=[0,15]))
-    fig.update_layout(font=dict(family="Courier New, monospace"))
 
+
+    config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
