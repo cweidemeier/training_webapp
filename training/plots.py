@@ -3,7 +3,7 @@ from .models import Exercise_name, Training, Exercise, Training_type
 
 # graph test 
 import pandas as pd
-from django.db.models import Sum
+
 
 # plotly 
 from plotly.offline import plot
@@ -180,11 +180,10 @@ def plot_pie_types(request):
             sum_2.append(sum_[i])
             training_2.append(training[i])
 
-    # colorscale 
-    color_ind = [0,1,2,3,4,5]
-    greys = n_colors('rgba(255,255,255)', 'rgb(0,0,0)', 6, colortype='rgb')
-    colorscale = np.array(greys)[color_ind]
-
+    #  custom colorscale 
+    # color_ind = [i for i in range(len(training_2))]
+    # greys = n_colors( 'rgb(0,0,0)','rgba(255,255,255)', len(training_2), colortype='rgb')
+    # colorscale = np.array(greys)[color_ind]
 
     # convert to df 
     df = pd.DataFrame({'training_type': training_2,'frequency': sum_2})
@@ -193,8 +192,8 @@ def plot_pie_types(request):
     #plot and save 
     fig = px.pie(df, values='frequency', names='training_type', title= 'What kind of workouts:', 
                 hover_name = 'frequency', hover_data = {'frequency': False, 'training_type': False}, 
-                color_discrete_map = dict(zip(training_2, colorscale))) # geht irgendwie noch nicht. 
-
+               color_discrete_sequence=px.colors.sequential.Blugrn[::-1]) 
+                    # Mint, Darkmint, Greens
 
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
@@ -621,16 +620,16 @@ def reps_sets(request):
     button.append(dict(
                         args=[{"visible": [True]},
                                 {'yaxis.range': [0,max(df['set1']+5)], 
-                                 'yaxis2.range': [0,max(df['set1']+5)]},
+                                 'yaxis2.range': [0,max(df['sum']+5)]},   # if - show individual reps - replace 'sum' with 'set1'
                                 ],
                         label='All',
                         method="update"
                     ))
     
-    for ex in ex_names:     # if - show individual res - replace 'sum' with 'set1'
+    for ex in ex_names:     # if - show individual reps - replace 'sum' with 'set1'
         button.append(dict(
                             args=[ {"visible": [ex == dataex[i] for i in range(len(dataex))]*2}, 
-                                {'yaxis.range': [0, max(df['sum'].where(df['exercise'] == ex).dropna() +5)], 
+                                {'yaxis.range': [0, max(df['set1'].where(df['exercise'] == ex).dropna() +5)], 
                                  'yaxis2.range':[0, max(df['sum'].where(df['exercise'] == ex).dropna() +5)]
                                  },
                                 ],
@@ -675,7 +674,4 @@ def reps_sets(request):
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
-
-## yaxis range 
-## größer umso häufiger? 
-## 
+# umso häufiger umso größer der Kreis ? 

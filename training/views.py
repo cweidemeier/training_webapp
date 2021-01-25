@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 
 
-
 def home(request):
     # noch was rein, wenn kein training drinnen ist. nonetype not subscriptable
     if request.user.is_authenticated:
@@ -201,3 +200,4 @@ def dashboard2(request):
                'title':title,
                'username': request.user}
     return render(request, 'dashboard2.html', context)
+

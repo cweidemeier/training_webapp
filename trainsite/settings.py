@@ -26,7 +26,7 @@ SECRET_KEY = 'v=^%)*2%trg0jt00p#6fgc!)4-xyrlk0vv@35zca5-@&1hha(y'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-# ALLOWED_HOSTS = ['trainwithcan.pythonanywhere.com']
+#ALLOWED_HOSTS = ['trainwithcan.pythonanywhere.com']
 
 
 # Application definition
