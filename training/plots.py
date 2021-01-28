@@ -138,7 +138,7 @@ def plot_histograms_reppset(request):
         
         })
     fig.layout.yaxis.fixedrange = True
-    fig.update_traces(marker_color='#347c17')
+    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
     fig.update_layout(margin=dict(l=0, r=0))
     config = {'displayModeBar': False}
     fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="black"))
@@ -665,7 +665,7 @@ def reps_sets(request):
                      font=dict(family="Courier New, monospace")
                      )
 
-    fig.update_traces(marker_color='#347c17', marker_size = 10)
+    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-2], marker_size = 10)
     fig.update_traces( hoverlabel=dict(bgcolor="black"))
     fig.update_traces(cliponaxis=False)
 
