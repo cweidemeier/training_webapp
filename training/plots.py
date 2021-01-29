@@ -290,7 +290,7 @@ def display_year(z,request,
 
 
     #4cc417 green #347c17 dark green
-    colorscale=[[False, 'lightgrey'], [True, '#347c17']]
+    colorscale=[[False, 'lightgrey'], [True, px.colors.sequential.Blugrn[-2]]]
     
     # handle end of year
     
@@ -574,20 +574,20 @@ def reps_sets(request):
     
     master = []
     for training_id in tr_ids: 
-           ex_names = df_trex.where(df_trex['training_ID'] == training_id)['exercise'].dropna().unique()
-           for e in ex_names:
-                reps = df_trex.where(df_trex['training_ID'] == training_id).dropna()
-                sets = reps.where(reps['exercise'] == e).dropna()
-                rep_per = list(sets['reps'])
-                rep_per.insert(0, e)
-                rep_per.insert(0,Training.objects.values('training_date').filter(training_ID = training_id)[0]['training_date'])
-                master.append(rep_per)
+        ex_names = df_trex.where(df_trex['training_ID'] == training_id)['exercise'].dropna().unique()
+        for e in ex_names:
+            reps = df_trex.where(df_trex['training_ID'] == training_id).dropna()
+            sets = reps.where(reps['exercise'] == e).dropna()
+            rep_per = list(sets['reps'])
+            rep_per.insert(0, e)
+            rep_per.insert(0,Training.objects.values('training_date').filter(training_ID = training_id)[0]['training_date'])
+            master.append(rep_per)
     
     #all unique exercises by the user 
     ex_names = df_trex['exercise'].dropna().unique()
 
     df = pd.DataFrame(master, columns = ['training_date','exercise','set1','set2','set3','set4','set5'])
-    
+
     # get traces for each row in dataframe 
     data1 = []
     for i,row in df.iterrows(): 
@@ -600,14 +600,17 @@ def reps_sets(request):
     data2 = []
     # show total reps at that day
     for i,row in df.iterrows():
-        data2.append(go.Scatter(x=[df['training_date'].iloc[i]], y=[df['sum'].iloc[i]],mode='markers'))
+        x1 = [df['training_date'].iloc[i]]
+        y1 = [df['sum'].iloc[i]]
+        data2.append(go.Scatter(x=x1, y=y1,mode='markers' ))
+        # remove trace: hovertemplate= f'{x1[0].strftime("%y-%m-%d"),int(y1[0])}<extra></extra>' (but other issues atm)
 
     # show individual reps.     
     # for i,row in df.iterrows():
     #     data2.append(go.Scatter(x=[df['training_date'].iloc[i]]*5, y=list(df[['set1','set2','set3','set4','set5']].iloc[i]),mode='markers'))
             
 
-    fig = make_subplots(rows=2, cols=1, subplot_titles=('Repetitions per set', 'Total repetitions by day'))
+    fig = make_subplots(rows=2, cols=1, subplot_titles=('Repetitions per set', 'Total repetitions per day'))
 
     for i in data1:
         fig.add_trace(i, row=1, col=1) 
@@ -666,7 +669,7 @@ def reps_sets(request):
                      )
 
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-2], marker_size = 10)
-    fig.update_traces( hoverlabel=dict(bgcolor="black"))
+    fig.update_traces(hoverlabel=dict(bgcolor="black"))
     fig.update_traces(cliponaxis=False)
 
 

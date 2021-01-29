@@ -23,7 +23,7 @@ def home(request):
         else: 
             last_training = date.today()
     else: 
-        title = f'Welcome test_user'
+        title = f'Welcome anonymous user'
         subsubtitle = 'You are not logged in. This is an example!'
         query = Training.objects.all().filter(user_name = 'test_user')
         last_training = query.values().order_by('-training_date').first()['training_date']
