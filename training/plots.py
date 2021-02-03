@@ -176,16 +176,16 @@ def plot_pie_types(request):
         query = Training.objects.all().filter(user_name=request.user)
         for e in range(len(Training_type.objects.all())):
             training.append(Training_type.objects.values('training_type')[e]['training_type'])
-            temp = query.filter(training_type = e+1).count()
+            temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
             sum_.append(0 if temp is None else temp)
 
     else: 
         query = Training.objects.all().filter(user_name='test_user')
         for e in range(len(Training_type.objects.all())):
             training.append(Training_type.objects.values('training_type')[e]['training_type'])
-            temp = query.filter(training_type = e+1).count()
+            temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
             sum_.append(0 if temp is None else temp)
-
+    
     # can be implemented in a better way. 
     sum_2 = []
     training_2 = []
