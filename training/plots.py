@@ -268,20 +268,32 @@ def display_year(z,request,
     types = []
     dates = []
 
+
+    ######### nochmal richtig machen #########################
+    
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name=request.user)
         for i in range(len(query)):
-            types.append(query.values('training_type')[i]['training_type'])
+            if query.values('training_type')[i]['training_type'] <2: 
+                types.append(query.values('training_type')[i]['training_type'])
+            elif query.values('training_type')[i]['training_type'] < 5:
+                types.append(query.values('training_type')[i]['training_type'] - 1)
+            else:
+                types.append(query.values('training_type')[i]['training_type'] - 2)
             dates.append(query.values('training_date')[i]['training_date'])
             
     else: 
         query = Training.objects.all().filter(user_name='test_user')
         for i in range(len(query)):
-            types.append(query.values('training_type')[i]['training_type'])
+            if query.values('training_type')[i]['training_type'] <2: 
+                types.append(query.values('training_type')[i]['training_type'])
+            elif query.values('training_type')[i]['training_type'] < 5:
+                types.append(query.values('training_type')[i]['training_type'] - 1)
+            else:
+                types.append(query.values('training_type')[i]['training_type'] - 2)
             dates.append(query.values('training_date')[i]['training_date'])
 
-
-    text = ['' for i in dates_in_year] #gives something like list of strings like ‘2018-01-25’ for each date..
+    text = ['' for i in dates_in_year] 
 
 
     for i in range(len(dates)): 
