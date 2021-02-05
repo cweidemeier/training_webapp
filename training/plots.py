@@ -46,8 +46,9 @@ def plot_histograms_exercise(request):
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        })
+
     fig.layout.yaxis.fixedrange = True
-    fig.update_traces(marker_color='grey')
+    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
     fig.update_layout(margin=dict(l=0, r=0))
     fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="darkslategrey"))
     fig.update_layout(uniformtext_minsize=8)
@@ -103,7 +104,7 @@ def plot_histograms_reps(request):
     fig.update_traces(cliponaxis=False)
     fig.update_xaxes( title=None)
     fig.update_yaxes( title='Number of Reps')
-    fig.update_traces(marker_color='grey')
+    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
     fig.update_layout(font=dict(family="Courier New, monospace"))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
@@ -306,9 +307,8 @@ def display_year(z,request,
     #4cc417 green #347c17 dark green
     colorscale=[[False, 'lightgrey'], [True, px.colors.sequential.Blugrn[-2]]]
     
-    # handle end of year
-    
 
+    # handle end of year
     data = [
         go.Heatmap(
             x=weeknumber_of_dates,
@@ -455,7 +455,7 @@ def get_training_days(request):
 
 def plot_heatmap_week(request):
     # label 
-    timeslot = [x for x in range(8,24)]
+    timeslot = [x for x in range(7,23)]
     weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     # data
@@ -473,7 +473,7 @@ def plot_heatmap_week(request):
         ind_day = query.values()[i]['training_date'].weekday()  # index tag first element of query
         for j in range(len(timeslots)): 
             if query.values()[i]['training_time'] <= timeslots[j]: 
-                frequency[j][ind_day] += 1 
+                frequency[j][ind_day] += 1
                 break
 
     # flatten list for colorscale    - max and min then delta in steps of 1. more beautiful
@@ -494,35 +494,33 @@ def plot_heatmap_week(request):
             if frequency[i][j] == 0: 
                 text[i][j] = ''
             else: 
-                text[i][j] = f'{timeslot[i]}:00 -  {frequency[i][j]}'
+                text[i][j] = f'{timeslot[i]}:00 |  {frequency[i][j]}'
     
     # color scale 
     greys = n_colors('rgba(255,255,255)', 'rgb(0,0,0)', np.max(frequency_)+1, colortype='rgb')
     greys[0] = 'rgba(0,0,0,0)'  # zero is transparent
     colorscale=np.array(greys)[frequency_]
 
-
     fig = go.Figure()
     fig.add_trace(go.Heatmap(
         x = weekdays,
         y = timeslot,
         z = frequency,
-        colorscale=np.array(greys)[frequency_],
+        colorscale= colorscale,   #px.colors.sequential.Blugrn,
         text=text,
         hoverinfo='text',
         opacity = 0,
         showscale = True,
-
     ))
     fig.update_layout(
-        yaxis_title="Time of Day",
+        yaxis_title="Hour of Day",
         title = 'Workout Days & Times:',
         xaxis = {'showgrid': False },
         yaxis = {'showgrid': False },
-        font=dict(
-            family="Courier New, monospace",             
-        )
-    )
+        font=dict(family="Courier New, monospace", 
+         
+    ))
+
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
@@ -540,6 +538,7 @@ def plot_heatmap_week(request):
                     fillcolor=colorscale[frequency[i][j]],
                 )
 
+    
     fig.update_traces( hoverlabel=dict(bgcolor="darkslategrey"))
     fig['layout']['yaxis']['autorange'] = "reversed"
     fig.update_xaxes(side="top")
@@ -547,7 +546,11 @@ def plot_heatmap_week(request):
     fig.layout.yaxis.fixedrange = True
     config = {'displayModeBar': False}
     fig.update_layout(margin=dict(l=0, r=0))
-
+    fig.update_layout(
+        yaxis = dict(
+            tickmode = 'linear',
+            tick0 = 8,
+            dtick = 2))
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
@@ -691,7 +694,7 @@ def reps_sets(request):
     
     fig.update_yaxes(title_text="Reps", row=1, col=1)
     fig.update_yaxes(title_text="Reps", row=2, col=1)
-    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-2], marker_size = 10)
+    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1], marker_size = 10)
     fig.update_traces(cliponaxis=False)
 
     config = {'displayModeBar': False}

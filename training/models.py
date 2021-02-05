@@ -37,9 +37,10 @@ class Training(models.Model):
     training_ID = models.AutoField(primary_key=True)
     location = models.ForeignKey(Training_location, on_delete=CASCADE, default = 2)
     training_date = models.DateField(default=date.today, auto_now=False)
-    training_time = models.TimeField(default = None, null=True, blank=True, auto_now = False)
+    training_time = models.TimeField(default = datetime.now().time().strftime("%H:%M"), null=True, blank=True, auto_now = False)
     training_type = models.ForeignKey(Training_type, blank=False, null=True, on_delete=CASCADE)
     user_name = models.CharField(max_length=30)
+
 
     class Meta:
         ordering = ('-training_ID',)

@@ -54,15 +54,13 @@ def add_training(request):
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user_name = request.user
-            print(obj.training_date, datetime.today().date(), obj.training_date == datetime.today().date())
-            if obj.training_date == datetime.today().date():
-                obj.training_time = datetime.now().time().strftime("%H:%M")
             obj.save()
             return redirect('/add_exercise')
     else: 
         form = TrainingForm(request.POST or None)
         if form.is_valid():
             return redirect('/add_exercise')
+
     context = { 'title': title , 'form': form, 'username': request.user}
     return render(request, 'training_entry.html', context) 
 
@@ -184,7 +182,7 @@ def dashboard(request):
     title = 'Workout statistics'
     context = {'plot3': plot_histograms_exercise(request), 
                'plot5': plot_histograms_reps(request), 
-               'plot4': plot_histograms_reppset(request), 
+               #'plot4': plot_histograms_reppset(request), 
                'plot1': plot_pie_types(request),
                'plot2': plot_heatmap_week(request),
                'plot6': reps_sets(request),
