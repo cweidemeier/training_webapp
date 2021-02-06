@@ -619,7 +619,6 @@ def reps_sets(request):
     data1 = []
     for i,row in df.iterrows(): 
         data1.append(go.Scatter(x=df[['Set 1','Set 2','Set 3','Set 4','Set 5']].columns, y = df[['set1','set2','set3','set4','set5']].iloc[i],mode='markers', name = ''))  
-                     # ,text = df[['set1','set2','set3','set4','set5']].iloc[i], hovertemplate = 'Average reps:'))
 
     # list of exercises, with duplicates
     dataex = list(df['exercise'])
@@ -632,40 +631,34 @@ def reps_sets(request):
         y1 = [df['sum'].iloc[i]]
         data2.append(go.Scatter(x=x1, y=y1,mode='markers' , name = ''))
        
-
     fig = make_subplots(rows=2, cols=1, subplot_titles=('Average Repetitions per Set', 'Total Repetitions per Day'))
-
     for i in data1:
         fig.add_trace(i, row=1, col=1) 
-
     for i in data2: 
         fig.add_trace(i, row=2, col=1)
 
-
+    # add dropdown options 
     button = []
     button.append(dict(
                         args=[{"visible": [True]},
-                                {'yaxis.range': [0,max(df['Set 1']+5)], 
-                                 'yaxis2.range': [0,max(df['sum']+5)]},   # if - show individual reps - replace 'sum' with 'set1'
+                                {'yaxis.range': [0,max(df['Set 1']+2)], 
+                                 'yaxis2.range': [0,max(df['sum']+5)]},   
                                 ],
                         label='All',
                         method="update"
                     ))
     
-    for ex in ex_names:     # if - show individual reps - replace 'sum' with 'set1'
+    for ex in ex_names:
         button.append(dict(
-                            args=[ {"visible": [ex == dataex[i] for i in range(len(dataex))]*2}, 
-                                {'yaxis.range': [0, max(df['Set 1'].where(df['exercise'] == ex).dropna() +5)], 
+                            args=[{"visible": [ex == dataex[i] for i in range(len(dataex))]*2}, 
+                                {'yaxis.range': [0, max(df['Set 1'].where(df['exercise'] == ex).dropna() +2)], 
                                  'yaxis2.range':[0, max(df['sum'].where(df['exercise'] == ex).dropna() +5)]
-                                 },
-                                ],
+                                 }],
                             label=ex,
                             method="update"
                         ))
 
-    # Add dropdown
-    updatemenus=[
-            dict(
+    updatemenus=[dict(
                 buttons=button,
                 direction="down",
                 pad={"r": 10, "t": 10},
@@ -676,10 +669,9 @@ def reps_sets(request):
                 yanchor="top",
                 bgcolor='white',
                 bordercolor='darkslategrey'
-            ),
-        ]
+            )]
 
-    fig['layout']['updatemenus'] = updatemenus
+    fig.update_layout(updatemenus = updatemenus)
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
@@ -689,16 +681,22 @@ def reps_sets(request):
                      uniformtext_minsize=8,
                      showlegend=False,
                      font=dict(family="Courier New, monospace"),
-                     hoverlabel=dict(bgcolor="darkslategrey"),
-                     )
-    
-    fig.update_yaxes(title_text="Reps", row=1, col=1)
-    fig.update_yaxes(title_text="Reps", row=2, col=1)
+                     hoverlabel=dict(bgcolor="darkslategrey"))
+
+    fig.update_yaxes(title_text="Average Reps",
+                    tickmode = 'linear',
+                    tick0 = 0,
+                    dtick = 2, 
+                    row=1, col=1)
+    fig.update_yaxes(title_text="Reps", 
+                    tickmode = 'linear',
+                    tick0 = 0,
+                    dtick = 5, 
+                    row=2, col=1)
+    fig.update_layout(yaxis=dict(range=[0,max(df['Set 1']+2)]))
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1], marker_size = 10)
-    fig.update_traces(cliponaxis=False)
+    # fig.update_traces(cliponaxis=False)
 
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
-
-# umso häufiger umso größer der Kreis ? 

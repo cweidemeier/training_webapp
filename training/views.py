@@ -13,25 +13,25 @@ from django.contrib.auth.decorators import permission_required
 
 
 def home(request):
-    # noch was rein, wenn kein training drinnen ist. nonetype not subscriptable
     if request.user.is_authenticated:
         title = f'Welcome {request.user}'
-        subsubtitle = ''
+        subsubsubtitle = ''
+        login = ''
         query = Training.objects.all().filter(user_name = request.user)
         if len(query) != 0:
             last_training = query.values().order_by('-training_date').first()['training_date']
         else: 
             last_training = date.today()
     else: 
-        title = f'Welcome anonymous user'
-        subsubtitle = 'You are not logged in. This is an example!'
+        title = 'Welcome anonymous user'
+        subsubsubtitle = 'You will see data of a dummy user'
+        login = '<a class="nav-link" style="color: black" href="/accounts/login">Login to see your workout progress</a>'
         query = Training.objects.all().filter(user_name = 'test_user')
         last_training = query.values().order_by('-training_date').first()['training_date']
     
 
     today = date.today()
     delta = today - last_training
-
     if delta.days == 1: 
         subtitle = f"It's been {delta.days} day since your last training!"
     else: 
@@ -39,7 +39,8 @@ def home(request):
 
     context = { 'title': title,  
     'subtitle':subtitle, 
-    'subsubtitle': subsubtitle, 
+    'subsubsubtitle': subsubsubtitle,
+    'login': login,
     'plot_act': display_years(get_training_days(request), [datetime.now().year], request),
     'username': request.user }
     return render(request, 'base.html', context)
@@ -101,8 +102,6 @@ def add_exercise(request):
     return render(request, 'exercise_entry.html', context) 
 
 
-
-
 def training_list(request):
     title = 'Your Workouts'
     if request.user.is_authenticated:
@@ -116,9 +115,11 @@ def training_list(request):
         if request.method == 'POST':
             queryset = queryset.filter(training_type = form['training_type'].value())
 
-    context = { 'title': title, 'form':form,  'queryset': queryset, 'username': request.user}
+    context =  {'title': title, 
+                'form':form,  
+                'queryset': queryset, 
+                'username': request.user}
     return render(request, 'training_list.html', context)
-
 
 
 def training_edit(request, id=None, username= None):  
@@ -133,12 +134,9 @@ def training_edit(request, id=None, username= None):
                 instance.save()
                 return redirect(f'/training_list/{username}/{id}')
                 
-    context = {
-    "title": 'add exercise',
-    "form": form,
-    'username': request.user
-    }
- 
+    context = {'title': 'add exercise',
+               'form': form,
+               'username': request.user}
     return render(request, "exercise_entry_2.html", context)
 
 
@@ -147,7 +145,6 @@ def training_delete(request, id=None):
    instance = get_object_or_404(Training, training_ID=id)
    instance.delete()
    return redirect("/training_list")
-
 
 
 def training_list_redirect(request, id=None, username = None):
@@ -162,7 +159,6 @@ def training_list_redirect(request, id=None, username = None):
     return render(request, 'exercise_list.html', context)
     
 
-
 @login_required(login_url='/training_list')
 def exercise_delete(request, id, username):
     training_id = Exercise.objects.values().filter(id = id)[0]['training_ID_id']
@@ -171,15 +167,13 @@ def exercise_delete(request, id, username):
     return redirect(f"/training_list/{username}/{training_id}")
 
 
-
 @permission_required('training.add_choice', login_url='/')
 def todo(request):
     return render(request, 'Todo.html',{'username': request.user} )
 
 
-
 def dashboard(request): 
-    title = 'Workout statistics'
+    title = 'Workout Statistics'
     context = {'plot3': plot_histograms_exercise(request), 
                'plot5': plot_histograms_reps(request), 
                #'plot4': plot_histograms_reppset(request), 
@@ -189,7 +183,6 @@ def dashboard(request):
                'title':title,
                'username': request.user}
     return render(request, 'dashboard.html', context)
-
 
 
 def dashboard2(request): 
