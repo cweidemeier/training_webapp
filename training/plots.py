@@ -27,18 +27,15 @@ def plot_histograms_exercise(request):
         exc = Exercise.objects.values('exercise').filter(user_name = request.user)
         df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
 
-
     else: 
         # get exercise #'s and sum up reps by exercise name
         exc = Exercise.objects.values('exercise').filter(user_name = 'test_user')
         df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
 
-
     # get exercise names in textformat, merge to relate rep# to exercise name in text. 
-    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name'))
-    exc_name['index'] = range(1, len(Exercise_name.objects.all())+1)
+    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
+    exc_name = exc_name.rename({'id': 'index'}, axis = 1)
     new_df = exc_name.merge(df_exc, on='index', how='left').sort_values('exercise',ascending=False).dropna()
-    
 
     #plot 
     fig = px.bar(new_df, x='exercise_name', y='exercise', opacity = 0.7, title= 'Total number of sets per exercise:', hover_name = 'exercise_name', hover_data = {'exercise': False, 'exercise_name': False}, text = 'exercise')
@@ -76,10 +73,9 @@ def plot_histograms_reps(request):
         df_exc = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
 
     # get exercise names in textformat, merge to relate rep# to exercise name in text. 
-    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name'))
-    exc_name['exercise'] = range(1, len(Exercise_name.objects.all())+1)
+    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
+    exc_name = exc_name.rename({'id': 'exercise'}, axis =1)
     new_df = exc_name.merge(df_exc, on='exercise', how='left').sort_values('reps',ascending=False).dropna()
-
 
     #plot and save 
     fig = px.bar(new_df, x='exercise_name', y='reps', 
@@ -92,8 +88,8 @@ def plot_histograms_reps(request):
     fig.update_layout({
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-        
         })
+
     fig.update_layout(xaxis_type='category')
     fig.layout.yaxis.fixedrange = True
     fig.update_layout(margin=dict(l=0, r=0))
@@ -111,6 +107,7 @@ def plot_histograms_reps(request):
 
 
 
+# bar plot with average reps per set for each exercise 
 def plot_histograms_reppset(request):
     request = request 
     if request.user.is_authenticated:
@@ -131,13 +128,10 @@ def plot_histograms_reppset(request):
         df_repexc = df_exc.merge(df_rep, on='index', how='left')
         df_repexc['average'] = round(df_repexc['reps']/df_repexc['exercise'],1)
         
-        
     # get exercise names in textformat, merge to relate rep# to exercise name in text. 
-    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name'))
-    exc_name['index'] = range(1, len(Exercise_name.objects.all())+1)
+    exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
+    exc_name = exc_name.rename({'id':'index'}, axis=1)
     new_df = exc_name.merge(df_repexc, on='index', how='left').sort_values('average',ascending=False).dropna()
-
-
 
     #plot and save 
     fig = px.bar(new_df, x='exercise_name', y='average',
@@ -150,8 +144,8 @@ def plot_histograms_reppset(request):
     fig.update_layout({
         'plot_bgcolor': 'rgba(0, 0, 0, 0)',
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-        
         })
+
     fig.layout.yaxis.fixedrange = True
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
     fig.update_layout(margin=dict(l=0, r=0))
@@ -461,12 +455,10 @@ def plot_heatmap_week(request):
     # data
     frequency = [[0 for x in range(1,8)] for y in range(1,17)]
 
-    
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name = request.user).exclude(training_time__isnull=True)
     else: 
         query = Training.objects.all().filter(user_name = 'test_user').exclude(training_time__isnull=True)
-
 
     timeslots =  pd.date_range("07:30", "22:30", freq="60min").time
     for i in range(len(query)): 
@@ -476,18 +468,6 @@ def plot_heatmap_week(request):
                 frequency[j][ind_day] += 1
                 break
 
-    # flatten list for colorscale    - max and min then delta in steps of 1. more beautiful
-    output = []
-    def reemovNestings(l): 
-        for i in l: 
-            if type(i) == list: 
-                reemovNestings(i) 
-            else: 
-                output.append(i)
-        return set(output) 
-    frequency_ = list(reemovNestings(frequency))
-
-    
     text = [[0 for x in range(1,8)] for y in range(1,13)]
     for i in range(len(text)): 
         for j in range(len(text[i])):
@@ -495,38 +475,61 @@ def plot_heatmap_week(request):
                 text[i][j] = ''
             else: 
                 text[i][j] = f'{timeslot[i]}:00 |  {frequency[i][j]}'
-    
-    # color scale 
-    greys = n_colors('rgba(255,255,255)', 'rgb(0,0,0)', np.max(frequency_)+1, colortype='rgb')
+
+    # color of circles 
+    range_frequency = range(0, np.max(frequency)+1)
+    greys = n_colors('rgba(255,255,255)', 'rgb(0,0,0)', np.max(range_frequency)+1, colortype='rgb')
     greys[0] = 'rgba(0,0,0,0)'  # zero is transparent
-    colorscale=np.array(greys)[frequency_]
+    colorscale=np.array(greys)[range_frequency]
+
+    # colorscale legend 
+    color = []
+    for i in range(np.max(frequency)+1):
+        color.append([i/(np.max(frequency)+1), greys[i]])
+        color.append([(i+1)/(np.max(frequency)+1), greys[i]])
+    
 
     fig = go.Figure()
     fig.add_trace(go.Heatmap(
         x = weekdays,
         y = timeslot,
         z = frequency,
-        colorscale= colorscale,   #px.colors.sequential.Blugrn,
+        colorscale= color,   #px.colors.sequential.Blugrn,
         text=text,
         hoverinfo='text',
         opacity = 0,
-        showscale = True,
+        colorbar=dict(
+        tick0=0,
+        dtick=1),
+        name = 'Frequency'
     ))
+
+    # legend with categorical data - otherwise the legend will be continuous 
+    text2 = [['' for x in range(1,8)] for y in range(1,13)]
+    for i in range(1,np.max(frequency)+1): 
+        fig.add_trace(go.Heatmap(
+            x = weekdays,
+            y = timeslot,
+            z = [None for x in range(1,8)] ,
+            name = i,
+            colorscale = [ np.array(greys)[range_frequency][i] for x in range(2)],
+            text = text2,
+            hoverinfo='text',
+        ))
+    fig.update_traces(showlegend=True, showscale=False)
+
     fig.update_layout(
         yaxis_title="Hour of Day",
         title = 'Workout Days & Times:',
         xaxis = {'showgrid': False },
         yaxis = {'showgrid': False },
         font=dict(family="Courier New, monospace", 
-         
     ))
-
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-       })
+    })
     fig.update_layout(hovermode='x')
-
 
     for i in range(len(frequency)): 
         for j in range(len(frequency[0])): 
@@ -538,7 +541,6 @@ def plot_heatmap_week(request):
                     fillcolor=colorscale[frequency[i][j]],
                 )
 
-    
     fig.update_traces( hoverlabel=dict(bgcolor="darkslategrey"))
     fig['layout']['yaxis']['autorange'] = "reversed"
     fig.update_xaxes(side="top")
@@ -553,7 +555,6 @@ def plot_heatmap_week(request):
             dtick = 2))
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
-
 
 
 def reps_sets(request):

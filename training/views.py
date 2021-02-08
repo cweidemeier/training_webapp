@@ -49,7 +49,7 @@ def home(request):
 
 
 def add_training(request):
-    title = 'Add training'
+    title = 'Add Workout'
     if request.user.is_authenticated:
         form = TrainingForm(request.POST or None)
         if form.is_valid():
@@ -70,7 +70,7 @@ def add_training(request):
 
 
 def add_exercise(request):
-    title = 'Add exercise to last training'
+    title = 'Add Exercise to last Workout'
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name = request.user)
         form = ExerciseForm(request.POST or None, initial=query.values().first())
