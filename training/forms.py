@@ -28,5 +28,6 @@ class Training_list_searchForm(ModelForm):
     class Meta: 
         model = Training
         fields = ['training_type']  
+        labels = {'training_type': 'Filter by workout type' }
 
 

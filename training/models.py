@@ -24,7 +24,8 @@ class Training_location(models.Model):
 class Exercise_name(models.Model):
     exercise_name = models.CharField(max_length=50)
     user_name = models.CharField(max_length=30)
-    
+    class Meta:
+        ordering = ['exercise_name']
     def __str__(self):
         return str(self.exercise_name)
 
