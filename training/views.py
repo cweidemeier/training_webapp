@@ -23,7 +23,7 @@ def home(request):
         else: 
             last_training = date.today()
     else: 
-        title = 'Welcome anonymous user'
+        title = 'Welcome Anonymous User'
         subsubsubtitle = 'You will see data of a dummy user'
         login = '<a class="nav-link" style="color: black" href="/accounts/login">Login to see your workout progress</a>'
         query = Training.objects.all().filter(user_name = 'test_user')
@@ -71,29 +71,19 @@ def add_exercise(request):
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name = request.user)
         form = ExerciseForm(request.POST or None, initial=query.values().first())
-        if  request.method == 'POST' and 'save' in request.POST:
+        if  request.method == 'POST' and 'Save' in request.POST:
             if form.is_valid():
                 obj = form.save(commit=False)
                 obj.training_ID = Training.objects.get(training_ID = query.values().first()['training_ID'])
                 obj.user_name = request.user
                 obj.save()
                 return redirect('/add_exercise')
-        if  request.method == 'POST' and 'finish' in request.POST:
-            if form.is_valid():
-                obj = form.save(commit=False)
-                obj.training_ID = Training.objects.get(training_ID = query.values().first()['training_ID'])
-                obj.user_name = request.user
-                obj.save()
-                return redirect('/')
 
     else:
         form = ExerciseForm(request.POST or None, initial=Training.objects.values().first())
         if  request.method == 'POST' and 'save' in request.POST:
             if form.is_valid():
                 return redirect('/add_exercise')
-        if  request.method == 'POST' and 'finish' in request.POST:
-            if form.is_valid():
-                return redirect('/')
 
     context = { 'title': title , 'form': form, 'username': request.user}
     return render(request, 'exercise_entry.html', context) 

@@ -631,24 +631,23 @@ def reps_sets(request):
         x1 = [df['training_date'].iloc[i]]
         y1 = [df['sum'].iloc[i]]
         data2.append(go.Scatter(x=x1, y=y1,mode='markers' , name = ''))
-       
+    
     fig = make_subplots(rows=2, cols=1, subplot_titles=('Average Repetitions per Set', 'Total Repetitions per Day'))
     for i in data1:
         fig.add_trace(i, row=1, col=1) 
     for i in data2: 
         fig.add_trace(i, row=2, col=1)
 
+    # hide all traces except last training type enetered. 
+    invisible_list = [i for i in range(1,len(data1))]
+    for j in range(len(data2)):
+        if df['exercise'][j] != df['exercise'][0]:
+            invisible_list.append(j+len(data1))
+    for k in invisible_list:
+        fig.update_traces(visible=False, selector=k)
+
     # add dropdown options 
     button = []
-    button.append(dict(
-                        args=[{"visible": [True]},
-                                {'yaxis.range': [0,max(df['Set 1']+2)], 
-                                 'yaxis2.range': [0,max(df['sum']+5)]},   
-                                ],
-                        label='All',
-                        method="update"
-                    ))
-    
     for ex in ex_names:
         button.append(dict(
                             args=[{"visible": [ex == dataex[i] for i in range(len(dataex))]*2}, 
@@ -694,6 +693,7 @@ def reps_sets(request):
                     tick0 = 0,
                     dtick = 5, 
                     row=2, col=1)
+    fig.update_layout(yaxis2_range=[0,max(df['sum'].where(df['exercise']==df['exercise'][0])+5)])
     fig.update_layout(yaxis=dict(range=[0,max(df['Set 1']+2)]))
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1], marker_size = 10)
     # fig.update_traces(cliponaxis=False)
