@@ -61,11 +61,11 @@
         <tr>
             <td>{{instance.exercise}}</td>
             <td>{{instance.reps}}</td>
-            <td><a href='/training_list/{{instance.user_name}}/{{instance.id}}_delete' data-toggle="tooltip" title="delete"><img src="{% static 'img/trash.png' %}"></a></td>
+            <td><a href='/training_list/{{instance.user_name}}/{{instance.id}}_delete' data-toggle="tooltip" title="Delete"><img src="{% static 'img/trash.png' %}"></a></td>
         </tr>  
     {% endfor %}
     </table>
-    <a class='btn btn-secondary' role="button" href= {{link}} >add exercise </a>
+    <a class='btn btn-secondary' role="button" href= {{link}} >Add Exercise </a>
   </div>
 </main>
 <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

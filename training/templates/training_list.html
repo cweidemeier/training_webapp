@@ -78,7 +78,7 @@
             <td> <b> <a href="/training_list/{{instance.user_name}}/{{instance.training_ID}}" style='color: black'> {{instance.training_type}}</a> </b></td>
             <td>{{instance.location}}</td>
             <td>{{instance.training_date}}</td>
-            <td><a href='/training_list/{{instance.training_ID}}_delete' data-toggle="tooltip" title="delete"><img src="{% static 'img/trash.png' %}"></a></td>
+            <td><a href='/training_list/{{instance.training_ID}}_delete' data-toggle="tooltip" title="Delete"><img src="{% static 'img/trash.png' %}"></a></td>
 
         </tr> 
         {% endfor %}

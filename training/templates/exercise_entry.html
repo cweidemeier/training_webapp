@@ -53,14 +53,14 @@
     <form method='post' action=''>
         {% csrf_token %}
         {{form|crispy}}
-        <input class='btn btn-secondary' name = 'save' type='submit' value = 'save' />
-        <input class='btn btn-secondary' name = 'finish' type='submit' value = 'finish training' />
+        <input class='btn btn-secondary' name = 'Save' type='submit' value = 'Save' />
+        <input class='btn btn-secondary' name = 'Finish' type='submit' value = 'Finish Workout' />
     </form>
 
 
     <br>
     <br>
-  <a href='/training_list'  style='color: black'><i> *Edit an existing training </i></a>
+  <a href='/training_list'  style='color: black'><i> *Edit an existing workout </i></a>
   </div>
 
 

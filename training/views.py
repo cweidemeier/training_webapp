@@ -66,9 +66,6 @@ def add_training(request):
     return render(request, 'training_entry.html', context) 
 
 
-
-
-
 def add_exercise(request):
     title = 'Add Exercise to last Workout'
     if request.user.is_authenticated:
@@ -134,7 +131,7 @@ def training_edit(request, id=None, username= None):
                 instance.save()
                 return redirect(f'/training_list/{username}/{id}')
                 
-    context = {'title': 'add exercise',
+    context = {'title': 'Add Exercise',
                'form': form,
                'username': request.user}
     return render(request, "exercise_entry_2.html", context)

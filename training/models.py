@@ -47,7 +47,7 @@ class Training(models.Model):
 class Exercise(models.Model): 
     training_ID = models.ForeignKey(Training, on_delete=CASCADE, null=True) 
     exercise = models.ForeignKey(Exercise_name, on_delete=CASCADE, null=True)
-    reps = models.IntegerField(choices=list(zip(range(1, 21), range(1, 21))), unique=False)
+    reps = models.IntegerField(choices=list(zip(range(1, 21), range(1, 21))), default = 10, unique=False)
     user_name = models.CharField(max_length=30)
 
     def __str__(self):
