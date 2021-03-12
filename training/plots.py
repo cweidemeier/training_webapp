@@ -1,9 +1,6 @@
-from numpy.lib.twodim_base import triu_indices
+
 from .models import Exercise_name, Training, Exercise, Training_type
-
-# graph test 
 import pandas as pd
-
 
 # plotly 
 from plotly.offline import plot
@@ -38,22 +35,29 @@ def plot_histograms_exercise(request):
     new_df = exc_name.merge(df_exc, on='index', how='left').sort_values('exercise',ascending=False).dropna()
 
     #plot 
-    fig = px.bar(new_df, x='exercise_name', y='exercise', opacity = 0.7, title= 'Total number of sets per exercise:', hover_name = 'exercise_name', hover_data = {'exercise': False, 'exercise_name': False}, text = 'exercise')
+    fig = px.bar(new_df, x='exercise_name', y='exercise', opacity = 0.7, 
+                    title= 'Total number of sets per exercise:', 
+                    hover_name = 'exercise_name', 
+                    hover_data = {'exercise': False, 'exercise_name': False}, 
+                    text = 'exercise')
+
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
-       'paper_bgcolor': 'rgba(0, 0, 0, 0)',
-       })
+       'paper_bgcolor': 'rgba(0, 0, 0, 0)'})
 
-    fig.layout.yaxis.fixedrange = True
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
-    fig.update_layout(margin=dict(l=0, r=0))
-    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="darkslategrey"))
-    fig.update_layout(uniformtext_minsize=8)
-    fig.update_layout(xaxis_tickangle=45)
-    fig.update_traces(cliponaxis=False)
+    fig.update_layout(margin=dict(l=0, r=0),
+                      font=dict(family="Courier New, monospace"),
+                      uniformtext_minsize=8,
+                      xaxis_tickangle=45)
+
+    fig.update_traces(textposition='outside', 
+                      hoverlabel=dict(bgcolor="darkslategrey"),
+                      cliponaxis=False)
+
     fig.update_xaxes( title=None)
     fig.update_yaxes( title='Number of Sets')
-    fig.update_layout(font=dict(family="Courier New, monospace"))
+    fig.layout.yaxis.fixedrange = True
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config )
     return plot_div
@@ -90,18 +94,21 @@ def plot_histograms_reps(request):
         'paper_bgcolor': 'rgba(0, 0, 0, 0)',
         })
 
-    fig.update_layout(xaxis_type='category')
-    fig.layout.yaxis.fixedrange = True
-    fig.update_layout(margin=dict(l=0, r=0))
-    config = {'displayModeBar': False}
-    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="darkslategrey"))
-    fig.update_layout(uniformtext_minsize=8)
-    fig.update_layout(xaxis_tickangle=45)
-    fig.update_traces(cliponaxis=False)
+    fig.update_layout(xaxis_type='category',
+                      margin=dict(l=0, r=0),
+                      uniformtext_minsize=8,
+                      xaxis_tickangle=45,
+                      font=dict(family="Courier New, monospace"))
+
+    fig.update_traces(textposition='outside', 
+                      hoverlabel=dict(bgcolor="darkslategrey"),
+                      marker_color=px.colors.sequential.Blugrn[-1],
+                      cliponaxis=False)
+
     fig.update_xaxes( title=None)
     fig.update_yaxes( title='Number of Reps')
-    fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
-    fig.update_layout(font=dict(family="Courier New, monospace"))
+    fig.layout.yaxis.fixedrange = True
+    config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
@@ -120,7 +127,7 @@ def plot_histograms_reppset(request):
         df_repexc['average'] = round(df_repexc['reps']/df_repexc['exercise'],1)
         
     else: 
-        # get exercise #'s and sum up reps by exercise name
+        #  get exercise #'s and get average rep/set per exercise
         exc = Exercise.objects.values('exercise', 'reps').filter(user_name = 'test_user')
         df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
         df_rep = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
@@ -148,14 +155,17 @@ def plot_histograms_reppset(request):
 
     fig.layout.yaxis.fixedrange = True
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1])
-    fig.update_layout(margin=dict(l=0, r=0))
+    fig.update_layout(margin=dict(l=0, r=0),
+                      uniformtext_minsize=8,
+                      xaxis_tickangle=45,
+                      font=dict(family="Courier New, monospace"))
+
     config = {'displayModeBar': False}
-    fig.update_traces(textposition='outside', hoverlabel=dict(bgcolor="darkslategrey"))
-    fig.update_traces(cliponaxis=False)
-    fig.update_layout(uniformtext_minsize=8)
-    fig.update_layout(xaxis_tickangle=45)
+    fig.update_traces(textposition='outside', 
+                      hoverlabel=dict(bgcolor="darkslategrey"),
+                      cliponaxis=False)
+
     fig.update_xaxes( title=None)
-    fig.update_layout(font=dict(family="Courier New, monospace"))
     plot_div = plot(fig, output_type='div', include_plotlyjs=False, config = config)
     return plot_div
 
@@ -166,7 +176,7 @@ def plot_pie_types(request):
     sum_ = []
     request = request
 
-    # histogram - number training types 
+    # get all trainings by user and sum up the frequency 
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name=request.user)
         for e in range(len(Training_type.objects.all())):
@@ -181,7 +191,7 @@ def plot_pie_types(request):
             temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
             sum_.append(0 if temp is None else temp)
     
-    # can be implemented in a better way. 
+    # find better way to implement. 
     sum_2 = []
     training_2 = []
     for i in range(len(sum_)): 
@@ -193,7 +203,7 @@ def plot_pie_types(request):
     df = pd.DataFrame({'training_type': training_2,'frequency': sum_2})
     df.sort_values('frequency', inplace=True, ascending = False)
     
-    #plot and save 
+    #plot  
     fig = px.pie(df, values='frequency', names='training_type', title= 'What kind of workouts:', 
                 hover_name = 'frequency', hover_data = {'frequency': False, 'training_type': False}, 
                color_discrete_sequence=px.colors.sequential.Blugrn[::-1]) 
@@ -203,16 +213,17 @@ def plot_pie_types(request):
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
        'paper_bgcolor': 'rgba(0, 0, 0, 0)',
        })
-    fig.update_layout(showlegend=False)
-    fig.update_layout(margin=dict(l=0, r=0))
-    fig.update_traces( textinfo='label+percent', textposition='outside', 
-                     textfont_size=14, marker=dict(line=dict(color='rgba(0, 0, 0, 0)', width =2)))
-    config = {'displayModeBar': False}
-    
-    fig.update_layout(
-        hoverlabel=dict(bgcolor="darkslategrey"),
-        font=dict(family="Courier New, monospace"))
+    fig.update_layout(showlegend=False,
+                      margin=dict(l=0, r=0),
+                      hoverlabel=dict(bgcolor="darkslategrey"),
+                      font=dict(family="Courier New, monospace"))
 
+    fig.update_traces( textinfo='label+percent', 
+                       textposition='outside', 
+                       textfont_size=14, 
+                       marker=dict(line=dict(color='rgba(0, 0, 0, 0)', width =2)))
+
+    config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
@@ -262,34 +273,19 @@ def display_year(z,request,
     request = request 
     types = []
     dates = []
-
-
-    ######### nochmal richtig machen #########################
-    
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name=request.user)
         for i in range(len(query)):
-            if query.values('training_type')[i]['training_type'] <2: 
-                types.append(query.values('training_type')[i]['training_type'])
-            elif query.values('training_type')[i]['training_type'] < 5:
-                types.append(query.values('training_type')[i]['training_type'] - 1)
-            else:
-                types.append(query.values('training_type')[i]['training_type'] - 2)
+            types.append(query.values('training_type')[i]['training_type'])
             dates.append(query.values('training_date')[i]['training_date'])
             
     else: 
         query = Training.objects.all().filter(user_name='test_user')
         for i in range(len(query)):
-            if query.values('training_type')[i]['training_type'] <2: 
-                types.append(query.values('training_type')[i]['training_type'])
-            elif query.values('training_type')[i]['training_type'] < 5:
-                types.append(query.values('training_type')[i]['training_type'] - 1)
-            else:
-                types.append(query.values('training_type')[i]['training_type'] - 2)
+            types.append(query.values('training_type')[i]['training_type'])
             dates.append(query.values('training_date')[i]['training_date'])
 
     text = ['' for i in dates_in_year] 
-
 
     for i in range(len(dates)): 
         if dates[i] in dates_in_year: 
@@ -297,11 +293,8 @@ def display_year(z,request,
 
             text[dates_in_year.index(dates[i])] +=  Training_type.objects.values('training_type')[x]['training_type'] + ', ' + dates_in_year[dates_in_year.index(dates[i])].strftime(' %d.%m.%Y') + ' '
 
-
-    #4cc417 green #347c17 dark green
     colorscale=[[False, 'lightgrey'], [True, px.colors.sequential.Blugrn[-2]]]
     
-
     # handle end of year
     data = [
         go.Heatmap(
@@ -317,7 +310,6 @@ def display_year(z,request,
         )
     ]
     
-        
     if month_lines:
         kwargs = dict(
             mode='lines',
@@ -352,8 +344,7 @@ def display_year(z,request,
                         **kwargs
                     )
                 ]
-                    
-                    
+                             
     layout = go.Layout(
         height= 400,
         yaxis=dict(
@@ -387,7 +378,7 @@ def display_year(z,request,
     fig.update_traces( hoverlabel=dict(bgcolor="darkslategrey"))
     fig.update_layout(margin=dict(l=0, r=0))
     fig['layout']['yaxis']['scaleanchor']='x'
-     
+
     return fig
 
 
@@ -407,13 +398,12 @@ def display_years(z, years, request):
         })
 
     fig.update_layout(font=dict(family="Courier New, monospace"))
-    # fig.update_layout(margin=dict(l=0, r=0,  t= 200))
     plot_div = plot(fig, output_type='div', config=config)
     return plot_div
 
 
 
-# Function that returns a 0-list with ones, when the day was a training day. 
+# Function that returns a 0-list, with 1s when the day was a training day. 
 def get_training_days(request):
     request = request  
     dates = []
@@ -437,14 +427,12 @@ def get_training_days(request):
     for i in range(delta.days + 1):
         this_year.append(sdate + timedelta(days=i))
 
-
     for i in range(len(this_year)): 
         if this_year[i] in dates: 
             this_year[i] = 1 
         else: 
             this_year[i] = 0 
     return this_year
-
 
 
 def plot_heatmap_week(request):
@@ -488,7 +476,6 @@ def plot_heatmap_week(request):
         color.append([i/(np.max(frequency)+1), greys[i]])
         color.append([(i+1)/(np.max(frequency)+1), greys[i]])
     
-
     fig = go.Figure()
     fig.add_trace(go.Heatmap(
         x = weekdays,
@@ -524,6 +511,7 @@ def plot_heatmap_week(request):
         xaxis = {'showgrid': False },
         yaxis = {'showgrid': False },
         font=dict(family="Courier New, monospace", 
+
     ))
     fig.update_layout({
        'plot_bgcolor': 'rgba(0, 0, 0, 0)',
@@ -681,7 +669,12 @@ def reps_sets(request):
                      uniformtext_minsize=8,
                      showlegend=False,
                      font=dict(family="Courier New, monospace"),
-                     hoverlabel=dict(bgcolor="darkslategrey"))
+                     hoverlabel=dict(bgcolor="darkslategrey"),
+                     yaxis2_range=[0,max(df['sum'].where(df['exercise']==df['exercise'][0])+5)],
+                     yaxis=dict(range=[0,max(df['Set 1']+2)]),
+                     annotations=[
+                        dict(text="Workout progress:", showarrow=False,
+                             x=0.092, y=1.2)])
 
     fig.update_yaxes(title_text="Average Reps",
                     tickmode = 'linear',
@@ -693,10 +686,8 @@ def reps_sets(request):
                     tick0 = 0,
                     dtick = 5, 
                     row=2, col=1)
-    fig.update_layout(yaxis2_range=[0,max(df['sum'].where(df['exercise']==df['exercise'][0])+5)])
-    fig.update_layout(yaxis=dict(range=[0,max(df['Set 1']+2)]))
+
     fig.update_traces(marker_color=px.colors.sequential.Blugrn[-1], marker_size = 10)
-    # fig.update_traces(cliponaxis=False)
 
     config = {'displayModeBar': False}
     plot_div = plot(fig, output_type='div', config = config)

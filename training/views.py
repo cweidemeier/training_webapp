@@ -1,7 +1,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import TrainingForm, ExerciseForm, Training_list_searchForm
-from .models import Exercise_name, Training, Exercise
+from .models import Training, Exercise
 
 # import plot functions from plots.py 
 from .plots import * 
@@ -162,8 +162,7 @@ def todo(request):
 def dashboard(request): 
     title = 'Workout Statistics'
     context = {'plot3': plot_histograms_exercise(request), 
-               'plot5': plot_histograms_reps(request), 
-               #'plot4': plot_histograms_reppset(request), 
+               'plot5': plot_histograms_reps(request),
                'plot1': plot_pie_types(request),
                'plot2': plot_heatmap_week(request),
                'plot6': reps_sets(request),

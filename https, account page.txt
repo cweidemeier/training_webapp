@@ -1,5 +1,0 @@
-https 
-account page 
-sessions 
-git ignore
-copyright 

@@ -10,7 +10,7 @@ class TrainingForm(ModelForm):
         labels = {'training_type': 'What kind of workout?',
                   'training_date': 'Date', 
                   'training_time': 'Time'}
-    # to update time in form, when page is refreshed. 
+    # update time in form automatically. 
     def __init__(self, *args, **kwargs):
         kwargs.update(initial={
             'training_time': strftime('%H:%M')
