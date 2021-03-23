@@ -16,25 +16,24 @@ from plotly.subplots import make_subplots
 
 
 
-
+# function - bar plot of most frequently done exercise sets
 def plot_histograms_exercise(request):
     request = request 
+    # get list with all exercises done by user if logged in 
     if request.user.is_authenticated:
-        # get exercise #'s and sum up reps by exercise name
         exc = Exercise.objects.values('exercise').filter(user_name = request.user)
-        df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
-
     else: 
-        # get exercise #'s and sum up reps by exercise name
         exc = Exercise.objects.values('exercise').filter(user_name = 'test_user')
-        df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
 
-    # get exercise names in textformat, merge to relate rep# to exercise name in text. 
+    # convert list of exercises to dataframe for easier handling     
+    df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
+
+    # get exercise names, merge dfs to relate set# to exercise name 
     exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
     exc_name = exc_name.rename({'id': 'index'}, axis = 1)
     new_df = exc_name.merge(df_exc, on='index', how='left').sort_values('exercise',ascending=False).dropna()
 
-    #plot 
+    #plot histogram 
     fig = px.bar(new_df, x='exercise_name', y='exercise', opacity = 0.7, 
                     title= 'Total number of sets per exercise:', 
                     hover_name = 'exercise_name', 
@@ -63,25 +62,24 @@ def plot_histograms_exercise(request):
     return plot_div
 
 
-
+# function - bar plot of total number of repetition per exercise
 def plot_histograms_reps(request):
     request = request 
+    # get all exercises and repetitions from user 
     if request.user.is_authenticated:
-        # get exercise #'s and sum up reps by exercise name
         exc = Exercise.objects.values('exercise', 'reps').filter(user_name = request.user)
-        df_exc = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
-
     else:
-        # get exercise #'s and group reps by exercise name : sum
         exc = Exercise.objects.values('exercise', 'reps').filter(user_name = 'test_user')
-        df_exc = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
 
-    # get exercise names in textformat, merge to relate rep# to exercise name in text. 
+    # sum over all repetitions per exercise    
+    df_exc = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
+
+    # get exercise names, merge to relate rep# to exercise name in text. 
     exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
     exc_name = exc_name.rename({'id': 'exercise'}, axis =1)
     new_df = exc_name.merge(df_exc, on='exercise', how='left').sort_values('reps',ascending=False).dropna()
 
-    #plot and save 
+    #plot barplot 
     fig = px.bar(new_df, x='exercise_name', y='reps', 
         opacity = 0.7, 
         title= 'Total number of reps per exercise:', 
@@ -114,26 +112,19 @@ def plot_histograms_reps(request):
 
 
 
-# bar plot with average reps per set for each exercise 
+# bar plot with average reps per set for each exercise - currently not used 
 def plot_histograms_reppset(request):
     request = request 
     if request.user.is_authenticated:
-        # get exercise #'s and get average rep/set per exercise 
         exc = Exercise.objects.values('exercise', 'reps').filter(user_name = request.user)
-        df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
-        df_rep = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
-        df_rep.rename(columns={'exercise': 'index'}, inplace=True)
-        df_repexc = df_exc.merge(df_rep, on='index', how='left') 
-        df_repexc['average'] = round(df_repexc['reps']/df_repexc['exercise'],1)
-        
     else: 
-        #  get exercise #'s and get average rep/set per exercise
         exc = Exercise.objects.values('exercise', 'reps').filter(user_name = 'test_user')
-        df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
-        df_rep = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
-        df_rep.rename(columns={'exercise': 'index'}, inplace=True)
-        df_repexc = df_exc.merge(df_rep, on='index', how='left')
-        df_repexc['average'] = round(df_repexc['reps']/df_repexc['exercise'],1)
+
+    df_exc = pd.DataFrame.from_records(exc)['exercise'].value_counts().reset_index()
+    df_rep = pd.DataFrame.from_records(exc).groupby('exercise').sum().reset_index()
+    df_rep.rename(columns={'exercise': 'index'}, inplace=True)
+    df_repexc = df_exc.merge(df_rep, on='index', how='left')
+    df_repexc['average'] = round(df_repexc['reps']/df_repexc['exercise'],1)
         
     # get exercise names in textformat, merge to relate rep# to exercise name in text. 
     exc_name = pd.DataFrame.from_records(Exercise_name.objects.values('exercise_name', 'id'))
@@ -170,35 +161,31 @@ def plot_histograms_reppset(request):
     return plot_div
 
 
-
+# pie plot of exercise types 
 def plot_pie_types(request):
     training = []
     sum_ = []
     request = request
 
-    # get all trainings by user and sum up the frequency 
+    # get all trainings by user 
     if request.user.is_authenticated:
-        query = Training.objects.all().filter(user_name=request.user)
-        for e in range(len(Training_type.objects.all())):
-            training.append(Training_type.objects.values('training_type')[e]['training_type'])
-            temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
-            sum_.append(0 if temp is None else temp)
-
+        query = Training.objects.all().filter(user_name=request.user)  
     else: 
         query = Training.objects.all().filter(user_name='test_user')
-        for e in range(len(Training_type.objects.all())):
-            training.append(Training_type.objects.values('training_type')[e]['training_type'])
-            temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
-            sum_.append(0 if temp is None else temp)
+
+    # sum up the frequency of training types
+    for e in range(len(Training_type.objects.all())):
+        training.append(Training_type.objects.values('training_type')[e]['training_type'])
+        temp = query.filter(training_type = Training_type.objects.values('id')[e]['id']).count()
+        sum_.append(0 if temp is None else temp)
     
-    # find better way to implement. 
+    # create new list/df only with training types done by user, remove zero values. 
     sum_2 = []
     training_2 = []
     for i in range(len(sum_)): 
         if sum_[i] != 0:
             sum_2.append(sum_[i])
             training_2.append(training[i])
-
     # convert to df 
     df = pd.DataFrame({'training_type': training_2,'frequency': sum_2})
     df.sort_values('frequency', inplace=True, ascending = False)
@@ -229,7 +216,7 @@ def plot_pie_types(request):
 
 
 
-# MIT LICENSE
+# MIT LICENSE - function to plot activity plot. 
 def display_year(z,request,
                  year: int = None,
                  month_lines: bool = True,
@@ -273,17 +260,15 @@ def display_year(z,request,
     request = request 
     types = []
     dates = []
+    # get all workout types and dates from user 
     if request.user.is_authenticated:
-        query = Training.objects.all().filter(user_name=request.user)
-        for i in range(len(query)):
-            types.append(query.values('training_type')[i]['training_type'])
-            dates.append(query.values('training_date')[i]['training_date'])
-            
+        query = Training.objects.all().filter(user_name=request.user)           
     else: 
         query = Training.objects.all().filter(user_name='test_user')
-        for i in range(len(query)):
-            types.append(query.values('training_type')[i]['training_type'])
-            dates.append(query.values('training_date')[i]['training_date'])
+
+    for i in range(len(query)):
+        types.append(query.values('training_type')[i]['training_type'])
+        dates.append(query.values('training_date')[i]['training_date'])
 
     text = ['' for i in dates_in_year] 
 
@@ -382,7 +367,7 @@ def display_year(z,request,
     return fig
 
 
-
+# plot the activity plot for more than 1 year 
 def display_years(z, years, request):
     request = request 
     fig = make_subplots(rows=len(years), cols=1, subplot_titles=years)
@@ -407,20 +392,17 @@ def display_years(z, years, request):
 def get_training_days(request):
     request = request  
     dates = []
+    # get all workout dates from user 
     if request.user.is_authenticated:
         query = Training.objects.values('training_date').filter(user_name= request.user)
-        
-        for i in range(len(query)):
-            dates.append(query.values('training_date')[i]['training_date'])
-
     else: 
         query = Training.objects.values('training_date').filter(user_name= 'test_user')
-        for i in range(len(query)):
-            dates.append(query.values('training_date')[i]['training_date'])
+    
+    for i in range(len(query)):
+        dates.append(query.values('training_date')[i]['training_date'])
 
     sdate = date(datetime.datetime.now().year, 1, 1)   # start date
     edate = date(datetime.datetime.now().year, 12, 31)   # end date
-
     delta = edate - sdate
 
     this_year = []
@@ -435,6 +417,7 @@ def get_training_days(request):
     return this_year
 
 
+# heatmap plot with frequency of trainings 
 def plot_heatmap_week(request):
     # label 
     timeslot = [x for x in range(7,23)]
@@ -443,11 +426,13 @@ def plot_heatmap_week(request):
     # data
     frequency = [[0 for x in range(1,8)] for y in range(1,17)]
 
+    # get all workouts from user 
     if request.user.is_authenticated:
         query = Training.objects.all().filter(user_name = request.user).exclude(training_time__isnull=True)
     else: 
         query = Training.objects.all().filter(user_name = 'test_user').exclude(training_time__isnull=True)
 
+    # 2d array of days - timeslots 
     timeslots =  pd.date_range("07:30", "22:30", freq="60min").time
     for i in range(len(query)): 
         ind_day = query.values()[i]['training_date'].weekday()  # index tag first element of query
@@ -456,6 +441,7 @@ def plot_heatmap_week(request):
                 frequency[j][ind_day] += 1
                 break
 
+    # create hover text - time | frequency 
     text = [[0 for x in range(1,8)] for y in range(1,13)]
     for i in range(len(text)): 
         for j in range(len(text[i])):
@@ -476,20 +462,22 @@ def plot_heatmap_week(request):
         color.append([i/(np.max(frequency)+1), greys[i]])
         color.append([(i+1)/(np.max(frequency)+1), greys[i]])
     
+    # plot invisible data to get hover data at the right spot 
+    # this plots rectangles in the plot, I want circles/ellipses
     fig = go.Figure()
     fig.add_trace(go.Heatmap(
-        x = weekdays,
-        y = timeslot,
-        z = frequency,
-        colorscale= color,   #px.colors.sequential.Blugrn,
-        text=text,
-        hoverinfo='text',
-        opacity = 0,
-        colorbar=dict(
-        tick0=0,
-        dtick=1),
-        name = 'Frequency'
-    ))
+            x = weekdays,
+            y = timeslot,
+            z = frequency,
+            colorscale= color,   #px.colors.sequential.Blugrn,
+            text=text,
+            hoverinfo='text',
+            opacity = 0,
+            colorbar=dict(
+            tick0=0,
+            dtick=1),
+            name = 'Frequency'
+        ))
 
     # legend with categorical data - otherwise the legend will be continuous 
     text2 = [['' for x in range(1,8)] for y in range(1,13)]
@@ -519,6 +507,7 @@ def plot_heatmap_week(request):
     })
     fig.update_layout(hovermode='x')
 
+    # plot circles at the right spots to coincide with data
     for i in range(len(frequency)): 
         for j in range(len(frequency[0])): 
             if frequency[i][j] > 0: 
@@ -544,27 +533,22 @@ def plot_heatmap_week(request):
     plot_div = plot(fig, output_type='div', config = config)
     return plot_div
 
-
+# 'progess' plot 
 def reps_sets(request):
+    # get all workouts and exercises from user
     if request.user.is_authenticated:
-        tr = Training.objects.values('training_ID', 'training_date').filter(user_name = request.user)
-        df_tr = pd.DataFrame.from_records(tr)
-    
+        tr = Training.objects.values('training_ID', 'training_date').filter(user_name = request.user)    
         ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = request.user)
-        df_ex = pd.DataFrame.from_records(ex)
-
-        df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
-
     else:
         tr = Training.objects.values('training_ID', 'training_date').filter(user_name = 'test_user')
-        df_tr = pd.DataFrame.from_records(tr)
-    
         ex = Exercise.objects.values('training_ID', 'exercise', 'reps').filter(user_name = 'test_user')
-        df_ex = pd.DataFrame.from_records(ex)
+    
+    #convert to dataframe and merge to relate workouts with exercises done during the workout 
+    df_tr = pd.DataFrame.from_records(tr)
+    df_ex = pd.DataFrame.from_records(ex)
+    df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
 
-        df_trex = df_tr.merge(df_ex, on='training_ID', how='left')
-
-    # list of all exercises
+    # list of all exercise names
     exercises = []
     for e in range(len(Exercise_name.objects.all())):
         exercises.append(Exercise_name.objects.values('exercise_name')[e]['exercise_name'])
@@ -577,6 +561,7 @@ def reps_sets(request):
     df_trex['exercise'] = df_trex['exercise'].map(map_dict)
     tr_ids = df_trex['training_ID'].unique() # list with training_IDs 
     
+    # create list 
     master = []
     for training_id in tr_ids: 
         ex_names = df_trex.where(df_trex['training_ID'] == training_id)['exercise'].dropna().unique()

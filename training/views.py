@@ -169,12 +169,3 @@ def dashboard(request):
                'title':title,
                'username': request.user}
     return render(request, 'dashboard.html', context)
-
-
-def dashboard2(request): 
-    title = 'Workout statistics by exercise'
-    context = {'plot1': reps_sets(request),
-               'title':title,
-               'username': request.user}
-    return render(request, 'dashboard2.html', context)
-
