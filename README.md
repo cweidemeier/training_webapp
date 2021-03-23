@@ -1,4 +1,4 @@
-## Django based webapp to track my workouts. 
+## Django based webapp to track and visualize my workouts. 
 
 Live-installation: http://fitnesstracker.pythonanywhere.com/
 
