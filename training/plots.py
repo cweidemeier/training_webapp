@@ -22,6 +22,7 @@ def plot_histograms_exercise(request):
     # get list with all exercises done by user if logged in 
     if request.user.is_authenticated:
         exc = Exercise.objects.values('exercise').filter(user_name = request.user)
+    # if not logged in, get data of dummy user
     else: 
         exc = Exercise.objects.values('exercise').filter(user_name = 'test_user')
 
